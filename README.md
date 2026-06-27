@@ -1,7 +1,7 @@
 # GitDOS — DOS в браузере с диском из GitHub
 
 **Автор: Sementsul Maxim.** Репозиторий: https://github.com/sementsul/GitDOS
-
+Страница проекта тут: https://sementsul.github.io/GitDOS/
 Браузерный клиент DOSBox (**js-dos v8**, локально), где диск C: — это GitHub-репозиторий
 (чтение/запись/автосохранение). Доп. репозитории подключаются как папки `C:\DISKS\<буква>`.
 Дизайн — в стиле установщика Windows 98. Лицензии движка — см. `THIRD-PARTY.md`.
