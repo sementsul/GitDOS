@@ -224,7 +224,7 @@
 
 <div class="dd-win">
   <div class="dd-topbar"><span class="ico">🐙</span><h1>GitDOS</h1>
-    <span class="dd-ver"><span data-i18n="tagline">Твой DOS живёт в репозитории</span> · сборка 112</span>
+    <span class="dd-ver"><span data-i18n="tagline">Твой DOS живёт в репозитории</span> · сборка 120</span>
     <span id="apiLimit" class="dd-apilimit" title=""></span>
     <span style="margin-left:8px;display:flex;gap:4px">
       <button id="langRu" class="dd-btn" type="button" style="min-height:0;padding:1px 8px">RU</button>
@@ -400,6 +400,11 @@
             <label style="display:flex;gap:7px;align-items:flex-start;margin-top:10px;color:var(--fg)">
               <input type="checkbox" id="aiRun"> <span data-i18n="lblAiRun">⚠️ Авто-выполнение: ассистент сам запускает предложенные команды в DOS (для автоматизации). Без галочки — команда кладётся в поле ввода на твоё подтверждение.</span>
             </label>
+            <label style="display:flex;gap:7px;align-items:flex-start;margin-top:8px;color:var(--fg)">
+              <input type="checkbox" id="aiAsk"> <span data-i18n="lblAiAsk">Задаёт уточняющие вопросы (всплывают диалогом). Без галочки — решает сам и делает разумные допущения.</span>
+            </label>
+            <label data-i18n="lblAiSteps" style="margin-top:8px">Лимит шагов агента (0 = без лимита)</label>
+            <input id="aiSteps" type="number" min="0" max="99" autocomplete="off" placeholder="5" style="max-width:120px">
           </div>
         </div>
 
@@ -448,6 +453,18 @@
         <button id="mountBtn2" class="dd-btn" type="button" disabled data-i18n="btnRunClose">▶ Пуск и закрыть</button>
       </div><!-- /dd-wiz-body -->
     </div><!-- /dd-wiz -->
+  </div>
+</div>
+
+<!-- окно: задача для ассистента из файла -->
+<div class="dd-modal" id="aiFileModal">
+  <div class="dd-modal-box" style="width:440px">
+    <div class="dd-modal-h"><b data-i18n="mAiFile">🤖 Задача для ассистента из файла</b><button class="dd-btn dd-modalclose" data-close="aiFileModal" type="button">✕</button></div>
+    <div class="dd-wiz-body" style="max-height:none">
+      <div class="dd-hint" style="margin-top:0" data-i18n="aiFileHint">Выбери текстовый файл (.txt/.md) с задачей — его содержимое уйдёт ассистенту. Удобно для длинных задач (в DOS-команде AI слов мало).</div>
+      <div class="dd-drop" id="aiDrop" data-i18n-html="aiFileDrop">Перетащи файл задачи сюда<br>или <u>нажми, чтобы выбрать</u></div>
+      <input id="aiFileInput" type="file" accept=".txt,.md,.bat,.ini,text/*" hidden>
+    </div>
   </div>
 </div>
 
@@ -605,7 +622,7 @@
         <p>В окне «⚙️ Общие настройки» → блок «🗂 Что монтировать»: кнопка «Показать содержимое диска C:» читает дерево репозитория (<code>treeInfo</code>) и выводит папки/файлы верхнего уровня с размерами и галочками. Снятая галочка добавляет имя в <code>github.exclude</code> (хранится в профиле). При «Пуск» файлы с таким верхним сегментом пути <b>не читаются и не кладутся на диск</b> — большой диск стартует быстрее. <b>Важно:</b> исключённые файлы <b>не удаляются</b> из репозитория автосохранением (специальная защита: их нет на диске, но трогать их нельзя). Полезно, когда в репо лежит несколько игр, а запустить нужна одна.</p>
 
         <h3>Ассистент Claude (команда AI)</h3>
-        <p>В DOS: <code>AI &lt;вопрос&gt;</code> — спросить ассистента (модель Claude). Хост отправляет запрос напрямую в Anthropic API (<code>api.anthropic.com/v1/messages</code> с заголовком <code>anthropic-dangerous-direct-browser-access</code>), ответ выводится прямо в DOS-терминал. Ключ и модель задаются в «⚙️ Общие настройки» → «🤖 Ассистент». Ассистент <b>может управлять программами</b>: в запрос подмешивается список из каталога INSTALL (что доступно и что уже установлено), а ассистент действует директивами <code>INSTALL: &lt;id&gt;</code> / <code>UNINSTALL: &lt;id&gt;</code> (хост ставит/удаляет напрямую) и <code>RUN: &lt;команда&gt;</code>. Если ассистент предлагает команды: по умолчанию первая кладётся в поле ввода под экраном — ты сам решаешь, запускать (Enter). В настройках есть тумблер <b>«Авто-выполнение»</b> — тогда ассистент <b>сам запускает</b> все предложенные команды (для автоматизации): после показа ответа диск перемонтируется, и команды выполняются по готовности DOS (очередь <code>pendingCmds</code> на <code>ci-ready</code>). ⚠️ Авто-выполнение AI-команд рискованно (ассистент может выполнить нежелательную команду) — по умолчанию выключено; обратной связи по выводу команд у ассистента пока нет (выполняет «вслепую»). <b>Безопасность:</b> API-ключ — секрет, хранится только в браузере (localStorage), в код/коммиты не попадает; запросы идут из браузера (ключ виден) и платные — для личного использования. Ответ — ASCII/English (DOS = CP437). Вопрос — до ~9 слов (ограничение DOS-аргументов); длинные удобнее слать через поле ввода команд.</p>
+        <p>В DOS: <code>AI &lt;вопрос&gt;</code> — спросить ассистента (модель Claude). Хост отправляет запрос напрямую в Anthropic API (<code>api.anthropic.com/v1/messages</code> с заголовком <code>anthropic-dangerous-direct-browser-access</code>), ответ печатается прямо в <b>DOS-терминал построчно через <code>ECHO</code></b> (без перемонтирования/ребута) и дублируется в консоль (зелёный лог, <code>🤖 …</code>); там же видны ошибки API — <code>❌ Anthropic API: …</code> и <code>❌ GitHub: …</code>. Поскольку ответ набирается в терминал клавишами, ассистент отвечает очень кратко (≤6 строк); директивы (RUN/INSTALL/ASK) в терминал не печатаются. Ключ и модель задаются в «⚙️ Общие настройки» → «🤖 Ассистент». При <b>включённом авто-выполнении</b> работает <b>агент-цикл с обратной связью</b>: ассистент выполняет команду, хост перехватывает её вывод (редирект <code>команда &gt; C:\AIOUT.TXT</code> + маркер завершения <code>AIDONE</code>) и возвращает ассистенту следующим сообщением — тот видит результат и решает следующий шаг. <b>Лимит шагов</b> настраивается в «🤖 Ассистент» (по умолчанию 5; <code>0 = без лимита</code> — тогда цикл идёт, пока ассистент сам не остановится, с резервным потолком 99 от зацикливания). Без авто-выполнения — один ответ-совет (без выполнения). <b>Режим вопросов</b> (настройка «задаёт уточняющие вопросы»): включён — ассистент может задать уточняющий вопрос (директива <code>ASK:</code>, всплывает диалогом, твой ответ возвращается ему и он продолжает); выключен — решает сам и делает разумные допущения, не спрашивая. Ассистент <b>может управлять программами</b>: в запрос подмешивается список из каталога INSTALL (что доступно и что уже установлено), а ассистент действует директивами <code>INSTALL: &lt;id&gt;</code> / <code>UNINSTALL: &lt;id&gt;</code> (хост ставит/удаляет напрямую) и <code>RUN: &lt;команда&gt;</code>. Если ассистент предлагает команды: по умолчанию первая кладётся в поле ввода под экраном — ты сам решаешь, запускать (Enter). В настройках есть тумблер <b>«Авто-выполнение»</b> — тогда ассистент <b>сам запускает</b> все предложенные команды (для автоматизации): после показа ответа диск перемонтируется, и команды выполняются по готовности DOS (очередь <code>pendingCmds</code> на <code>ci-ready</code>). ⚠️ Авто-выполнение AI-команд рискованно (ассистент может выполнить нежелательную команду) — по умолчанию выключено. <b>Безопасность:</b> API-ключ — секрет, хранится только в браузере (localStorage), в код/коммиты не попадает; запросы идут из браузера (ключ виден) и платные — для личного использования. Ответ — ASCII/English (DOS = CP437). Вопрос — до ~9 слов (ограничение DOS-аргументов); длинные удобнее слать через поле ввода команд или командой <code>AIFILE</code> — она открывает окно выбора текстового файла (.txt/.md), и его содержимое целиком уходит ассистенту как задача (обходит лимит аргументов DOS).</p>
 
         <h3>Команда INSTALL (пакетный менеджер программ)</h3>
         <p>В DOS из любой папки: <code>INSTALL</code> — список доступных программ (по категориям, <code>*</code> = установлена); <code>INSTALL &lt;id&gt;</code> — установить. Программы берутся из репозитория проекта <b>sementsul/GitDOS</b>, папка <code>programs/&lt;категория&gt;/&lt;id&gt;/</code> (с манифестом <code>install.json</code>). Установка: файлы качаются в <code>C:\PROGRAMS\&lt;dir&gt;</code>, путь добавляется в <code>PATH</code> (управляемый блок <code>REM GITDOS:&lt;id&gt;</code> в AUTOEXEC.BAT, идемпотентно), плюс строки <code>autoexec</code>/<code>config</code> из манифеста; затем диск перемонтируется. Установленное уходит в твой репозиторий автосохранением. Чтение каталога — через raw (лимит API не тратит). Формат и пример — в <code>programs/README.md</code> репозитория. <code>INSTALL INFO &lt;id&gt;</code> — карточка программы (версия, размер, описание, что пропишется в конфиги) перед установкой; в манифесте можно задать <code>desc</code> и <code>version</code>. <b>Источник каталога настраивается</b> в «⚙️ Общие настройки» → «🧩 Каталог программ» (<code>owner/repo</code> или <code>owner/repo/подпапка</code>, по умолчанию <code>sementsul/GitDOS/programs</code>) — можно держать отдельный репозиторий-каталог. ⚠️ Указывай только доверенный источник (манифест может править AUTOEXEC/CONFIG).</p>
@@ -750,6 +767,20 @@ function b64(bytes){ let s=''; const ch=0x8000; for(let i=0;i<bytes.length;i+=ch
 function unb64(str){ const bin=atob((str||'').replace(/\n/g,'')); const u=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i); return u; }
 function enc(s){ return new TextEncoder().encode(s); }
 function fmtSize(n){ if(n<1024) return n+' Б'; if(n<1048576) return Math.round(n/1024*10)/10+' КБ'; return Math.round(n/1048576*10)/10+' МБ'; }
+// fetch с таймаутом и проверкой offline — чтобы запросы не зависали без интернета
+async function fetchTimeout(url, opts, ms){
+  if(typeof navigator!=='undefined' && navigator.onLine===false) throw new Error('no internet (offline)');
+  const ctrl=new AbortController(); const to=setTimeout(()=>{ try{ ctrl.abort(); }catch(_){} }, ms||45000);
+  try{ return await fetch(url, Object.assign({}, opts, {signal:ctrl.signal})); }
+  catch(e){ throw new Error((e&&e.name==='AbortError') ? 'request timeout (no server response)' : ('network error: '+((e&&e.message)||e))); }
+  finally{ clearTimeout(to); }
+}
+// напечатать строку прямо в DOS-терминал (через ECHO; только ASCII, без спецсимволов)
+async function dosNote(msg){
+  if(!ci || snapshotRef) return;
+  const s=String(msg).replace(/[^\x20-\x7E]/g,'').replace(/[<>|&%^]/g,' ').replace(/\s+/g,' ').trim().slice(0,70);
+  if(!s) return; try{ await dosType('ECHO GitDOS: '+s); }catch(_){}
+}
 
 // ---------- конфиг ----------
 const cfg = JSON.parse(localStorage.getItem('dosdisk_cfg')||'{}');
@@ -783,7 +814,7 @@ const I18N = {
     stepMountSel:'Что монтировать (выборочно)', hintMountSel:'Чтобы большой диск стартовал быстрее, можно не грузить тяжёлые папки. Сними галочки — эти папки/файлы не попадут на диск при «Пуск» (в репозитории они остаются и не удаляются).', btnMountSelLoad:'Показать содержимое диска C:',
     stepManifest:'Манифест .gitdos.json', hintManifest:'Необязательный файл .gitdos.json в корне диска: имя диска (в заголовок), что запускать (run) и скорость CPU (cycles). С ним диск стартует сразу в нужную программу.', btnManifest:'📦 Создать шаблон .gitdos.json',
     stepCatalog:'Каталог программ (INSTALL)', hintCatalog:'Откуда DOS-команда INSTALL берёт программы: owner/repo или owner/repo/подпапка. По умолчанию — каталог проекта GitDOS.',
-    stepAi:'Ассистент (Claude)', hintAi:'Команда AI в DOS спрашивает Claude. Нужен API-ключ Anthropic. ⚠️ Ключ хранится только в браузере, запросы идут напрямую на api.anthropic.com (ключ виден в браузере — для личного использования) и платные.', lblAiKey:'API-ключ Anthropic', lblAiModel:'Модель', lblAiRun:'⚠️ Авто-выполнение: ассистент сам запускает предложенные команды в DOS (для автоматизации). Без галочки — команда кладётся в поле ввода на твоё подтверждение.',
+    stepAi:'Ассистент (Claude)', hintAi:'Команда AI в DOS спрашивает Claude. Нужен API-ключ Anthropic. ⚠️ Ключ хранится только в браузере, запросы идут напрямую на api.anthropic.com (ключ виден в браузере — для личного использования) и платные.', lblAiKey:'API-ключ Anthropic', lblAiModel:'Модель', lblAiRun:'⚠️ Авто-выполнение: ассистент сам запускает предложенные команды в DOS (для автоматизации). Без галочки — команда кладётся в поле ввода на твоё подтверждение.', lblAiSteps:'Лимит шагов агента (0 = без лимита)', lblAiAsk:'Задаёт уточняющие вопросы (всплывают диалогом). Без галочки — решает сам и делает разумные допущения.',
     stepSysEdit:'Загрузочные файлы', hintSysEdit:'Правка AUTOEXEC.BAT и CONFIG.SYS прямо в браузере — что выполняется при старте диска и драйверы DOS.', btnSysEdit2:'⚙️ Редактировать AUTOEXEC.BAT / CONFIG.SYS',
     mSysEdit:'⚙️ AUTOEXEC.BAT и CONFIG.SYS', sysHint:'Загрузочные файлы диска C:. Изменения сохраняются в репозиторий (нужен токен) или на запущенный диск. Применяются при следующем «Пуск».', btnSysReload:'↻ Перечитать', btnSysSave:'💾 Сохранить',
     mScreen:'🖥️ Экран и DOSBox', lblCycles:'Скорость CPU (cycles)', hintCycles:'Применяется при следующем «Пуск». Если в .gitdos.json задан свой cycles — он важнее.', btnMute:'🔊 Звук: вкл',
@@ -798,7 +829,8 @@ const I18N = {
     navSupport:'💛 Поддержать проект', mSupport:'💛 Поддержать проект', supportText:'Если GitDOS пригодился — можно поддержать развитие. Спасибо! ❤️',
     btnDownload:'⬇ Скачать GitDOS (zip)',
     fmNew:'📁 Новая папка', fmTargetLbl:'Файлы попадут в:', fmRunFirst:'Запусти диск («Пуск»), чтобы выбирать папки. Сейчас — в корень C:.', fmNoFolders:'(папок нет)', fmPrompt:'Имя новой папки:',
-    btnReset:'🗑 Сбросить данные и перезагрузить', resetConfirm:'Сбросить все локальные данные (репозиторий, токен, язык, настройки) и перезагрузить страницу?'
+    btnReset:'🗑 Сбросить данные и перезагрузить', resetConfirm:'Сбросить все локальные данные (репозиторий, токен, язык, настройки) и перезагрузить страницу?',
+    mAiFile:'🤖 Задача для ассистента из файла', aiFileHint:'Выбери текстовый файл (.txt/.md) с задачей — его содержимое уйдёт ассистенту. Удобно для длинных задач (в DOS-команде AI слов мало).', aiFileDrop:'Перетащи файл задачи сюда<br>или <u>нажми, чтобы выбрать</u>'
   },
   en: {
     tagline:'your DOS lives in a repo', navDisks:'⚙️ General settings', navUpload:'📤 Upload files',
@@ -826,7 +858,7 @@ const I18N = {
     stepMountSel:'What to mount (selective)', hintMountSel:'To make a large disk start faster, you can skip heavy folders. Uncheck them — those folders/files won’t be loaded on Run (they stay in the repository and are not deleted).', btnMountSelLoad:'Show disk C: contents',
     stepManifest:'.gitdos.json manifest', hintManifest:'Optional .gitdos.json in the disk root: disk name (title bar), what to run (run) and CPU speed (cycles). With it the disk boots straight into the program.', btnManifest:'📦 Create .gitdos.json template',
     stepCatalog:'Program catalog (INSTALL)', hintCatalog:'Where the DOS INSTALL command takes programs from: owner/repo or owner/repo/subpath. Default — the GitDOS project catalog.',
-    stepAi:'Assistant (Claude)', hintAi:'The AI command in DOS asks Claude. Needs an Anthropic API key. ⚠️ The key is stored only in the browser, requests go directly to api.anthropic.com (key is visible in the browser — for personal use) and are billed.', lblAiKey:'Anthropic API key', lblAiModel:'Model', lblAiRun:'⚠️ Auto-run: the assistant runs its suggested commands in DOS itself (automation). Without it — the command goes to the input field for your confirmation.',
+    stepAi:'Assistant (Claude)', hintAi:'The AI command in DOS asks Claude. Needs an Anthropic API key. ⚠️ The key is stored only in the browser, requests go directly to api.anthropic.com (key is visible in the browser — for personal use) and are billed.', lblAiKey:'Anthropic API key', lblAiModel:'Model', lblAiRun:'⚠️ Auto-run: the assistant runs its suggested commands in DOS itself (automation). Without it — the command goes to the input field for your confirmation.', lblAiSteps:'Agent step limit (0 = no limit)', lblAiAsk:'Ask clarifying questions (shown as a dialog). Without it — decides itself and makes reasonable assumptions.',
     stepSysEdit:'Boot files', hintSysEdit:'Edit AUTOEXEC.BAT and CONFIG.SYS in the browser — what runs at disk startup and DOS drivers.', btnSysEdit2:'⚙️ Edit AUTOEXEC.BAT / CONFIG.SYS',
     mSysEdit:'⚙️ AUTOEXEC.BAT & CONFIG.SYS', sysHint:'Boot files of disk C:. Changes are saved to the repository (token needed) or to the running disk. Applied on the next Run.', btnSysReload:'↻ Reload', btnSysSave:'💾 Save',
     mScreen:'🖥️ Screen & DOSBox', lblCycles:'CPU speed (cycles)', hintCycles:'Applied on the next Run. If .gitdos.json sets its own cycles, that wins.', btnMute:'🔊 Sound: on',
@@ -841,7 +873,8 @@ const I18N = {
     navSupport:'💛 Support the project', mSupport:'💛 Support the project', supportText:'If GitDOS is useful — you can support its development. Thank you! ❤️',
     btnDownload:'⬇ Download GitDOS (zip)',
     fmNew:'📁 New folder', fmTargetLbl:'Files go to:', fmRunFirst:'Start the disk (Run) to pick folders. For now — to C: root.', fmNoFolders:'(no folders)', fmPrompt:'New folder name:',
-    btnReset:'🗑 Reset data & reload', resetConfirm:'Reset all local data (repository, token, language, settings) and reload the page?'
+    btnReset:'🗑 Reset data & reload', resetConfirm:'Reset all local data (repository, token, language, settings) and reload the page?',
+    mAiFile:'🤖 Assistant task from file', aiFileHint:'Pick a text file (.txt/.md) with a task — its content is sent to the assistant. Handy for long tasks (the DOS AI command takes few words).', aiFileDrop:'Drop a task file here<br>or <u>click to choose</u>'
   }
 };
 const navLang = (typeof navigator!=='undefined' && navigator.language) ? navigator.language : 'en';
@@ -886,7 +919,7 @@ function makeRepo(getConf){ return {
   async api(path, opts={}){ const t=this.token();
     const h={'Accept':'application/vnd.github+json'}; if(t) h.Authorization='Bearer '+t;
     if(opts.body) h['Content-Type']='application/json';
-    const r=await fetch(`https://api.github.com/repos/${this.repoName()}/${path}`, {...opts, headers:h});
+    const r=await fetchTimeout(`https://api.github.com/repos/${this.repoName()}/${path}`, {...opts, headers:h}, 30000);
     try{ noteRateLimit(r.headers); }catch(_){}
     if(!r.ok){ let extra=''; const rl=r.headers.get('x-ratelimit-remaining'), rs=r.headers.get('x-ratelimit-reset');
       if(r.status===403 && rl==='0' && rs){ try{ extra=' (лимит API исчерпан, сброс ~'+new Date(+rs*1000).toLocaleTimeString()+')'; }catch(_){} }
@@ -922,7 +955,7 @@ function makeRepo(getConf){ return {
   async read(p){ const sub=this.sub(), br=this.branchName(); const full=(sub?sub+'/':'')+p;
     if(this._private!==true){ // публичный (или ещё не знаем) — читаем с raw CDN, лимит API не тратим
       try{ const url='https://raw.githubusercontent.com/'+this.repoName()+'/'+br+'/'+full.split('/').map(encodeURIComponent).join('/');
-        const r=await fetch(url);
+        const r=await fetchTimeout(url, {}, 30000);
         if(r.ok){ this._private=false; return new Uint8Array(await r.arrayBuffer()); }
         if(r.status===404||r.status===403) this._private=true;   // приватный — больше raw не дёргаем (холостые 404)
       }catch(_){}
@@ -1040,31 +1073,102 @@ async function doUninstall(id, onDisk){
   if(cr.newText!==conf){ try{ await ci.fsWriteFile('CONFIG.SYS', enc(cr.newText)); }catch(_){} }
   log('🖥️ Удалено '+id+': '+removed+' файлов из C:\\PROGRAMS\\'+dir); return { removed, dir }; }
 // ---------- ассистент (Claude API) ----------
-const AI_SYSTEM = 'You are a concise assistant embedded in GitDOS, a DOS (DOSBox) environment in the browser where disk C: is a GitHub repository (auto-saved to GitHub). The user asks from a DOS prompt. Answer in plain ASCII English only (the DOS screen is CP437 - no Cyrillic or Unicode). Be brief (about 12 short lines max).\n'
+const AI_SYSTEM = 'You are a concise assistant embedded in GitDOS, a DOS (DOSBox) environment in the browser where disk C: is a GitHub repository (auto-saved to GitHub). The user asks from a DOS prompt. Answer in plain ASCII English only (the DOS screen is CP437 - no Cyrillic or Unicode). Your answer is TYPED into the DOS terminal key by key, so be VERY brief: at most 6 short lines, no markdown, no code fences.\n'
   + 'You can take actions, each on its own line:\n'
-  + '  RUN: <dos command>        - run a DOS command\n'
+  + '  RUN: <dos command>        - run a non-interactive DOS command (DIR, TYPE, COPY, MD, DEL...)\n'
   + '  INSTALL: <program id>     - install a program from the catalog\n'
   + '  UNINSTALL: <program id>   - remove an installed program\n'
-  + 'Use INSTALL:/UNINSTALL: (not RUN: INSTALL). The list of installable programs (with [installed] marks) is given in the user context. GitDOS also has DOS helper commands: GITDOS (git), UPLOADS (upload files).';
-async function askAssistant(prompt, context){
+  + 'Use INSTALL:/UNINSTALL: (not RUN: INSTALL). The list of installable programs (with [installed] marks) is in the user context. GitDOS also has DOS helper commands: GITDOS (git), UPLOADS (upload files).\n'
+  + 'When auto-run is enabled, each RUN command is executed and its output is sent back to you in the next message, so you can inspect results and decide the next step (multi-step automation). Do NOT use interactive programs. When the task is done, reply with a short final summary and NO more RUN lines.';
+// системный промпт + режим (интерактивный/автономный)
+function aiSystem(){ let s=AI_SYSTEM;
+  if(cfg.ai && cfg.ai.ask) s+='\nINTERACTIVE MODE: if the task is ambiguous or you need a choice/value, ask the user with a line "ASK: <question>" (one question per line). The answer is provided in the next message. Prefer asking over guessing on important decisions.';
+  else s+='\nAUTONOMOUS MODE: do not ask the user questions; decide how to do the task yourself and make reasonable assumptions.';
+  return s; }
+async function askAssistantMsgs(messages){
   const a=cfg.ai||{}; const key=a.key; if(!key) throw new Error('no API key');
   const model=(a.model||'claude-haiku-4-5-20251001').trim();
-  const userMsg = context ? (context+'\n\nUser: '+String(prompt)) : String(prompt);
-  const r=await fetch('https://api.anthropic.com/v1/messages', { method:'POST',
+  const r=await fetchTimeout('https://api.anthropic.com/v1/messages', { method:'POST',
     headers:{ 'x-api-key':key, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true', 'content-type':'application/json' },
-    body: JSON.stringify({ model, max_tokens:600, system:AI_SYSTEM, messages:[{role:'user', content:userMsg}] }) });
+    body: JSON.stringify({ model, max_tokens:700, system:aiSystem(), messages }) }, 60000);
   if(!r.ok) throw new Error('Claude '+r.status+' '+(await r.text()).slice(0,160));
-  const j=await r.json(); const txt=(j.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('\n');
-  return txt||'(empty response)';
+  const j=await r.json(); return (j.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('\n')||'(empty response)';
+}
+async function askAssistant(prompt, context){ return askAssistantMsgs([{role:'user', content: context?(context+'\n\nUser: '+String(prompt)):String(prompt)}]); }
+// выполнить команду в DOS и вернуть её вывод (редирект в файл + маркер завершения)
+async function runDosCapture(cmd){
+  try{ await ci.fsDeleteFile('AIOUT.TXT'); }catch(_){}
+  try{ await ci.fsDeleteFile('AIDONE'); }catch(_){}
+  await dosType(cmd+' > C:\\AIOUT.TXT');     // вывод команды -> файл
+  await dosType('TYPE C:\\AIOUT.TXT');        // и на экран (чтобы было видно)
+  await dosType('ECHO X > C:\\AIDONE');       // маркер «команда завершилась»
+  let done=false; for(let i=0;i<50;i++){ await sleep(300); try{ if((await fsList()).has('AIDONE')){ done=true; break; } }catch(_){} }
+  let out=''; try{ out=await readMarker('AIOUT.TXT'); }catch(_){}
+  try{ await ci.fsDeleteFile('AIOUT.TXT'); }catch(_){}
+  try{ await ci.fsDeleteFile('AIDONE'); }catch(_){}
+  return (done? out : (out||'(no output / timed out)')).slice(0,1500);
 }
 function aiLines(answer, kw){ const out=[], re=new RegExp('^\\s*'+kw+':\\s*(.+)$','i'); for(const l of String(answer).split('\n')){ const m=l.match(re); if(m) out.push(m[1].trim()); } return out; }
-function aiText(prompt, answer, autorun){
-  const L=['  GitDOS Assistant','  ================','  > '+String(prompt).slice(0,68),''];
-  for(const para of String(answer).split('\n')){ if(!para){ L.push(''); continue; }
-    for(const w of (para.match(/.{1,70}(\s|$)/g)||[para])) L.push('  '+w.replace(/\s+$/,'')); }
-  L.push(''); L.push(autorun ? '  (suggested commands are auto-run after this)' : '  (suggested command, if any, is in the input field below)');
-  L.push('  GITDOS NOW = status'); L.push('');
-  return L.join('\r\n')+'\r\n';
+function logAi(answer){ String(answer).split('\n').forEach(l=>{ if(l.trim()) log('🤖 '+l); }); }   // ответ ассистента — в консоль (лог)
+// напечатать ответ ассистента построчно в DOS-терминал через ECHO (без ребута; директивы не печатаем)
+async function dosEchoAnswer(answer){
+  if(!ci || snapshotRef) return;
+  const lines=String(answer).split('\n')
+    .filter(l=> !/^\s*(RUN|INSTALL|UNINSTALL|ASK):/i.test(l))
+    .map(l=> l.replace(/[^\x20-\x7E]/g,'').replace(/[<>|&%^]/g,' ').replace(/\s+$/,''));
+  try{ await dosType('ECHO.'); await dosType('ECHO --- Assistant ---'); }catch(_){ return; }
+  let n=0;
+  for(const l of lines){ if(n++>=16) break;
+    try{ if(l.trim()==='') await dosType('ECHO.'); else await dosType('ECHO '+l.slice(0,76)); }catch(_){ break; } }
+}
+// прогон ассистента по задаче (из команды AI или из файла): одиночный ответ или агент-цикл
+async function runAssistant(prompt){
+  prompt=String(prompt||'').trim();
+  if(!ci) return;
+  if(!prompt){ await dosNote('AI: empty task'); return; }
+  if(!(cfg.ai&&cfg.ai.key)){ await dosNote('AI: set API key in Settings - Assistant'); return; }
+  const files=await fsList();
+  log('🤖 Ассистент: «'+prompt.slice(0,50)+'»…');
+  let ctx='';
+  try{ const progs=await listPrograms(); const inst=new Set(progs.filter(p=>progInstalled(p, files)).map(p=>p.id));
+    if(progs.length) ctx='Installable programs (id [installed] : name - desc):\n'+progs.map(p=>'- '+p.id+(inst.has(p.id)?' [installed]':'')+' : '+p.name+(p.desc?(' - '+p.desc):'')).join('\n'); }
+  catch(e){ log('❌ GitHub (каталог INSTALL): '+e.message,'dd-warn'); }
+  const autorun=!!(cfg.ai&&cfg.ai.run);
+  const interactive=!!(cfg.ai&&cfg.ai.ask);
+  if(!autorun && !interactive){
+    // одиночный ответ-совет (команда — в поле ввода)
+    let answer; try{ answer=await askAssistant(prompt, ctx); }catch(e){ answer='Error: '+e.message; log('❌ Anthropic API: '+e.message,'dd-warn'); }
+    logAi(answer);
+    const runs=aiLines(answer,'RUN'); if(runs.length && $('cmdInput')) $('cmdInput').value=runs[0];
+    await dosEchoAnswer(answer);
+  } else {
+    // диалог: ассистент может задавать вопросы (ASK) и/или выполнять команды (RUN)
+    const lim=(cfg.ai && +cfg.ai.steps>0) ? +cfg.ai.steps : 99;
+    const messages=[{role:'user', content:(ctx?ctx+'\n\n':'')+'User: '+prompt}];
+    let finalText='', step=0;
+    for(step=0; step<lim; step++){
+      let answer; try{ answer=await askAssistantMsgs(messages); }catch(e){ finalText='Error: '+e.message; log('❌ Anthropic API: '+e.message,'dd-warn'); break; }
+      messages.push({role:'assistant', content:answer}); finalText=answer;
+      logAi(answer);
+      const asks=aiLines(answer,'ASK'), installs=aiLines(answer,'INSTALL'), uninstalls=aiLines(answer,'UNINSTALL'), runs=aiLines(answer,'RUN');
+      // 1) вопросы пользователю (интерактивный режим)
+      if(interactive && asks.length){ let qa='';
+        for(const q of asks){ let ans=null; try{ ans=window.prompt('🤖 '+q); }catch(_){}
+          log('🤖 вопрос: '+q+' → '+(ans==null?'(отмена)':ans)); qa+='Q: '+q+'\nA: '+(ans==null?'(no answer / cancelled)':ans)+'\n'; }
+        messages.push({role:'user', content:'Answers:\n'+qa+'\nContinue.'}); continue; }
+      // 2) действия с программами (если авто-выполнение)
+      if(autorun){
+        for(const id of uninstalls){ try{ await doUninstall(id.toLowerCase(), files); }catch(e){ log('❌ uninstall '+id+': '+e.message,'dd-warn'); } }
+        for(const id of installs){ try{ const p=(await listPrograms()).find(x=>x.id===id.toLowerCase()); if(p) await doInstall(p); else log('🤖 нет программы: '+id,'dd-warn'); }catch(e){ log('❌ install '+id+': '+e.message,'dd-warn'); } }
+        if(runs.length){ let feedback='';
+          for(const c of runs.slice(0,3)){ log('🤖 шаг '+(step+1)+': '+c); const out=await runDosCapture(c); feedback+='$ '+c+'\n'+out+'\n'; }
+          messages.push({role:'user', content:'Command output (inspect and continue, or give the final answer with no RUN lines):\n'+feedback}); continue; }
+      } else if(runs.length && $('cmdInput')){ $('cmdInput').value=runs[0]; }   // интерактив без авто-выполнения: команда в поле ввода
+      break;   // нет вопросов и нечего выполнять -> готово
+    }
+    if(step>=lim) log('🤖 достигнут лимит шагов ('+lim+')','dd-warn');
+    await dosEchoAnswer(finalText);
+  }
 }
 function programsListText(progs, instSet){
   const L=['  GitDOS - INSTALL','  ================','  available (INSTALL id):',''];
@@ -1372,6 +1476,7 @@ const GITDOS_BAT = [
   'ECHO UNINSTALL <id>               - remove an installed program',
   'ECHO UPLOADS                      - upload files into the current folder',
   'ECHO AI <question>                - ask the Claude assistant',
+  'ECHO AIFILE                       - assistant task from a text file',
   'ECHO (token is set in web settings, not here)',
   ':end',
   ''
@@ -1411,7 +1516,9 @@ const UPLOADS_BAT = ['@ECHO OFF','ECHO X > GTUP','ECHO Opening GitDOS upload win
 const INSTALL_BAT = ['@ECHO OFF','ECHO [%1 %2] > C:\\GTINST','ECHO GitDOS package manager... screen will refresh.',''].join('\r\n');
 const UNINSTALL_BAT = ['@ECHO OFF','IF "%1"=="" GOTO u','ECHO [%1] > C:\\GTUNINST','ECHO Removing program... screen will refresh.','GOTO e',':u','ECHO Usage: UNINSTALL id','ECHO Run INSTALL to see installed programs.',':e',''].join('\r\n');
 // AI: ассистент Claude из DOS (вопрос -> ответ на экране)
-const AI_BAT = ['@ECHO OFF','IF "%1"=="" GOTO u','ECHO [%1 %2 %3 %4 %5 %6 %7 %8 %9] > C:\\GTAI','ECHO Assistant is thinking... screen will refresh.','GOTO e',':u','ECHO Usage: AI your question  (e.g. AI how to copy a file)',':e',''].join('\r\n');
+const AI_BAT = ['@ECHO OFF','IF "%1"=="" GOTO u','ECHO [%1 %2 %3 %4 %5 %6 %7 %8 %9] > C:\\GTAI','ECHO Assistant is thinking... screen will refresh.','GOTO e',':u','ECHO Usage: AI your question  (e.g. AI how to copy a file)','ECHO Or AIFILE - pick a task file in the browser.',':e',''].join('\r\n');
+// AIFILE: открыть окно выбора текстового файла с задачей для ассистента
+const AIFILE_BAT = ['@ECHO OFF','ECHO X > C:\\GTAIF','ECHO Pick a task .txt file in the browser window...',''].join('\r\n');
 function diskListText(){ const g=cfg.github||{}; const L=['  GitDOS - disks','  =============='];
   L.push('  C: '+(g.repo||'-')+' ('+(g.branch||'main')+')'+(g.path?(' /'+g.path):''));
   (cfg.disks||[]).forEach(d=>{ L.push('  '+(d.letter||'?')+': '+(d.repo||'-')+' ('+(d.branch||'main')+')'+(d.token?' [token]':'')+'  -> C:\\DISKS\\'+(d.letter||'?')); });
@@ -1464,7 +1571,7 @@ function showText(c){ const cm=(c&&c.commit)||{}; const L=['  GitDOS - commit '+
 // служебные файлы DOS-утилиты (никогда не синкаются в репозиторий)
 const BRIDGE_FILES = new Set(['GITDOS.NFO','GITDOS.DAT','GITDOS.BAT','GTDISKS.TXT','GTPROFS.TXT',
   'GTSAVE','GTNOW','GTSET','GTPULL','GTLOG','GTPROF','GTDIFF','GTCOMMIT','GTAUTO','GTBRANCH','GTBRS','GTWHO','GTHIST','GTFILES',
-  'GTCO','GTREST','GTTAG','GTNEW','GTSHOW','GTMERGE','GTDELBR','GTRESET','VER.BAT','VER.DAT','UPLOADS.BAT','INSTALL.BAT','GTINST','UNINSTALL.BAT','GTUNINST','AI.BAT','GTAI']);
+  'GTCO','GTREST','GTTAG','GTNEW','GTSHOW','GTMERGE','GTDELBR','GTRESET','VER.BAT','VER.DAT','UPLOADS.BAT','INSTALL.BAT','GTINST','UNINSTALL.BAT','GTUNINST','AI.BAT','GTAI','AIOUT.TXT','AIDONE','AIFILE.BAT','GTAIF']);
 // маркер GTUP может лежать в ЛЮБОЙ папке (текущей в DOS) — исключаем его по базовому имени
 function isBridge(name){ return BRIDGE_FILES.has(name) || name.startsWith('COMMANDS/') || name.substring(name.lastIndexOf('/')+1)==='GTUP'; }
 let pushMsg=null;       // своё сообщение коммита (GITDOS COMMIT <msg>)
@@ -1555,11 +1662,14 @@ async function diffList(){
   }
   return out;
 }
+let lastAutoErr=null;   // чтобы не спамить одинаковой ошибкой каждые 6 c
 async function autoTick(){ if(syncing||cmdBusy||!ci) return; syncing=true;
-  try{ await pushChanges(true); }
+  try{ await pushChanges(true);
+    if(lastAutoErr){ lastAutoErr=null; log('✓ Автосохранение восстановлено.'); await dosNote('autosave restored (online)'); } }
   catch(e){ if(/rate limit|лимит API/i.test(e.message)){ stopAutoSync();
       log('⏸ Лимит GitHub API исчерпан — автосохранение на паузе. '+e.message.replace(/^GitHub \d+ /,'')+' Чтение публичных файлов лимит не тратит; нажми «Пуск» позже.','dd-warn'); }
-    else log('Автосохранение: '+e.message,'dd-warn'); }
+    else if(e.message!==lastAutoErr){ lastAutoErr=e.message;   // новая ошибка -> в лог И в DOS-терминал (одноразово)
+      log('❌ Автосохранение: '+e.message,'dd-warn'); await dosNote('autosave error: '+e.message); } }
   finally{ syncing=false; } }
 function startAutoSync(){ stopAutoSync(); lastBundleCrc=null; lastNamesSig=null;
   if(snapshotRef){ log('Снимок прошлой версии — только чтение, автосохранение выключено. Для возврата к актуальной версии нажми «Пуск».','dd-warn'); return; }
@@ -1690,22 +1800,11 @@ async function cmdTick(){ if(cmdBusy||syncing||!ci) return; cmdBusy=true;
     else if(files.has('GTAI')){
       const content=await readMarker('GTAI'); try{ await ci.fsDeleteFile('GTAI'); }catch(_){}
       const inner=(String(content).match(/\[(.*)\]/)||[])[1]||''; const prompt=inner.replace(/[\r\n]/g,' ').trim();
-      if(!prompt){ await writeDatRemount(statusLines(null,'AI: ask something, e.g. AI how to copy a file')); }
-      else if(!(cfg.ai&&cfg.ai.key)){ await writeDatRemount(statusLines(null,'AI: set API key in Settings -> Assistant')); }
-      else { log('🤖 Ассистент: «'+prompt.slice(0,50)+'»…');
-        // контекст: какие программы можно ставить/удалять
-        let ctx='';
-        try{ const progs=await listPrograms(); const inst=new Set(progs.filter(p=>progInstalled(p, files)).map(p=>p.id));
-          if(progs.length) ctx='Installable programs (id [installed] : name - desc):\n'+progs.map(p=>'- '+p.id+(inst.has(p.id)?' [installed]':'')+' : '+p.name+(p.desc?(' - '+p.desc):'')).join('\n'); }catch(_){}
-        let answer; try{ answer=await askAssistant(prompt, ctx); }catch(e){ answer='Error: '+e.message; }
-        const runs=aiLines(answer,'RUN'), installs=aiLines(answer,'INSTALL'), uninstalls=aiLines(answer,'UNINSTALL');
-        const autorun=!!(cfg.ai&&cfg.ai.run);
-        if(autorun){
-          for(const id of uninstalls){ try{ await doUninstall(id.toLowerCase(), files); }catch(e){ log('🤖 uninstall '+id+': '+e.message,'dd-warn'); } }
-          for(const id of installs){ try{ const p=(await listPrograms()).find(x=>x.id===id.toLowerCase()); if(p) await doInstall(p); else log('🤖 нет программы: '+id,'dd-warn'); }catch(e){ log('🤖 install '+id+': '+e.message,'dd-warn'); } }
-          if(runs.length) pendingCmds=runs.slice();
-        } else if(runs.length && $('cmdInput')){ $('cmdInput').value=runs[0]; }   // вручную: команда в поле ввода
-        await writeDatRemount(aiText(prompt, answer, autorun && (runs.length||installs.length||uninstalls.length))); }
+      await runAssistant(prompt);
+    }
+    else if(files.has('GTAIF')){ try{ await ci.fsDeleteFile('GTAIF'); }catch(_){}
+      log('🤖 DOS-команда: задача из файла…'); openModal('aiFileModal');
+      try{ $('aiFileInput').click(); }catch(_){}   // best-effort: системный диалог (если есть «живой» жест)
     }
     else if(files.has('GTCO')){ const sha=(await readMarker('GTCO')).replace(/[\r\n]/g,'').trim();
       try{ await ci.fsDeleteFile('GTCO'); }catch(_){}
@@ -1908,6 +2007,7 @@ async function mount(opts){ opts=opts||{}; const ref=opts.ref||null;
     pendingLoad.push({path:'COMMANDS/INSTALL.BAT', data:enc(INSTALL_BAT)});
     pendingLoad.push({path:'COMMANDS/UNINSTALL.BAT', data:enc(UNINSTALL_BAT)});
     pendingLoad.push({path:'COMMANDS/AI.BAT', data:enc(AI_BAT)});
+    pendingLoad.push({path:'COMMANDS/AIFILE.BAT', data:enc(AIFILE_BAT)});
     bundleFiles.push({path:'.jsdos/dosbox.conf', data:enc(makeConf(confM))});
     log('Собираю образ диска…'); await boot(URL.createObjectURL(new Blob([buildZip(bundleFiles)],{type:'application/zip'})));
   }catch(e){ log('Ошибка: '+e.message,'dd-warn'); }
@@ -2348,7 +2448,9 @@ function init(){
   if($('aiKey')){ cfg.ai=cfg.ai||{}; $('aiKey').value=cfg.ai.key||''; $('aiModel').value=cfg.ai.model||'';
     $('aiKey').addEventListener('input',()=>{ (cfg.ai=cfg.ai||{}).key=$('aiKey').value.trim(); saveCfg(); });
     $('aiModel').addEventListener('input',()=>{ (cfg.ai=cfg.ai||{}).model=$('aiModel').value.trim(); saveCfg(); });
-    if($('aiRun')){ $('aiRun').checked=!!cfg.ai.run; $('aiRun').addEventListener('change',()=>{ (cfg.ai=cfg.ai||{}).run=$('aiRun').checked; saveCfg(); }); } }
+    if($('aiRun')){ $('aiRun').checked=!!cfg.ai.run; $('aiRun').addEventListener('change',()=>{ (cfg.ai=cfg.ai||{}).run=$('aiRun').checked; saveCfg(); }); }
+    if($('aiSteps')){ $('aiSteps').value=(cfg.ai.steps!=null?cfg.ai.steps:''); $('aiSteps').addEventListener('input',()=>{ const v=parseInt($('aiSteps').value,10); (cfg.ai=cfg.ai||{}).steps=isNaN(v)?null:Math.max(0,Math.min(99,v)); saveCfg(); }); }
+    if($('aiAsk')){ $('aiAsk').checked=!!cfg.ai.ask; $('aiAsk').addEventListener('change',()=>{ (cfg.ai=cfg.ai||{}).ask=$('aiAsk').checked; saveCfg(); }); } }
   $('mountSelLoad').onclick=mountSelLoad;
   $('launchLoad').onclick=launchLoad;
   $('shareCopy').onclick=shareCopy;
@@ -2400,6 +2502,18 @@ function init(){
   ['dragover','dragenter'].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.add('dd-over');}));
   ['dragleave','drop'].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.remove('dd-over');}));
   drop.addEventListener('drop',ev=>{ if(ev.dataTransfer.files.length) uploadFiles(Array.from(ev.dataTransfer.files)); });
+
+  // окно «задача для ассистента из файла»
+  const aiDrop=$('aiDrop'), aiFi=$('aiFileInput');
+  async function aiTaskFromFile(file){ if(!file) return; closeModal('aiFileModal');
+    if(cmdBusy){ log('Подожди, идёт другая операция ассистента','dd-warn'); return; }
+    let text=''; try{ text=await file.text(); }catch(e){ log('Файл задачи: '+e.message,'dd-warn'); return; }
+    cmdBusy=true; try{ await runAssistant(text); }catch(e){ log('Ассистент: '+e.message,'dd-warn'); } finally{ cmdBusy=false; } }
+  if(aiDrop){ aiDrop.onclick=()=>aiFi.click();
+    aiFi.onchange=()=>{ const f=aiFi.files[0]; aiFi.value=''; if(f) aiTaskFromFile(f); };
+    ['dragover','dragenter'].forEach(e=>aiDrop.addEventListener(e,ev=>{ev.preventDefault();aiDrop.classList.add('dd-over');}));
+    ['dragleave','drop'].forEach(e=>aiDrop.addEventListener(e,ev=>{ev.preventDefault();aiDrop.classList.remove('dd-over');}));
+    aiDrop.addEventListener('drop',ev=>{ if(ev.dataTransfer.files.length) aiTaskFromFile(ev.dataTransfer.files[0]); }); }
 
   $('langRu').onclick=()=>setLang('ru');
   $('langEn').onclick=()=>setLang('en');
