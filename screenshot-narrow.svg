@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800" viewBox="0 0 600 800">
+  <rect width="600" height="800" fill="#0a18c8"/>
+  <g transform="translate(150,110)">
+    <rect x="0" y="0" width="300" height="220" rx="12" fill="#0d1117" stroke="#c0c0c0" stroke-width="6"/>
+    <text x="30" y="140" font-family="DejaVu Sans Mono" font-size="86" font-weight="bold" fill="#39d353">C:\&gt;</text>
+    <rect x="205" y="96" width="40" height="58" fill="#39d353"/>
+    <rect x="110" y="232" width="80" height="16" fill="#c0c0c0"/>
+    <rect x="130" y="242" width="40" height="30" fill="#808080"/>
+  </g>
+  <text x="300" y="470" text-anchor="middle" font-family="DejaVu Sans" font-size="96" font-weight="bold" fill="#ffffff">GitDOS</text>
+  <text x="300" y="528" text-anchor="middle" font-family="DejaVu Sans" font-size="32" fill="#ffec3d">DOS lives in your GitHub repo</text>
+  <text x="300" y="586" text-anchor="middle" font-family="DejaVu Sans" font-size="22" fill="#cfe0ff">Run DOS in the browser</text>
+  <text x="300" y="760" text-anchor="middle" font-family="DejaVu Sans Mono" font-size="18" fill="#9fb4ff">powered by DOSBox / js-dos</text>
+</svg>
