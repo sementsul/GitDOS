@@ -1,9 +1,9 @@
 {
-  "name": "GitDOS Hello (test)",
-  "id": "hello",
-  "dir": "HELLO",
-  "run": "HELLO.BAT",
-  "path": true,
-  "version": "1.0",
-  "desc": "Тестовая программа: проверяет, что INSTALL/UNINSTALL работают."
+  "name": "ASM Edit",
+  "id": "ASMEDIT",
+  "dir": "ASMEDIT",
+  "run": "ASMEDIT.EXE",
+  "path": false,
+  "version": "1.82a",
+  "desc": "ASM Edit is a text editor for MS‑DOS designed to write and modify assembly language source files."
 }
