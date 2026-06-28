@@ -1,9 +1,0 @@
-{
-  "name": "GitDOS Hello (test)",
-  "id": "hello",
-  "dir": "HELLO",
-  "run": "HELLO.BAT",
-  "path": true,
-  "version": "1.0",
-  "desc": "This is test program."
-}
