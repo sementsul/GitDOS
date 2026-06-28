@@ -1,9 +1,9 @@
 {
-  "name": "GitDOS Hello (test)",
-  "id": "hello",
-  "dir": "HELLO",
-  "run": "HELLO.BAT",
+  "name": "Volkov Commander.ver.English",
+  "id": "vc",
+  "dir": "vc",
+  "run": "VC.COM",
   "path": true,
-  "version": "1.0",
-  "desc": "Тестовая программа: проверяет, что INSTALL/UNINSTALL работают."
+  "version": "4.0",
+  "desc": "Volkov Commander (VC) is a file manager for DOS inspired by the Norton Commander. Volkov Commander is purely written in assembly language and is very small (less than 100 KB) and fast."
 }
