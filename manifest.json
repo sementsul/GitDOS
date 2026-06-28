@@ -1,0 +1,21 @@
+{
+  "name": "GitDOS — DOS поверх GitHub",
+  "short_name": "GitDOS",
+  "description": "DOSBox в браузере, где диск C: хранится в репозитории GitHub.",
+  "lang": "ru",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0a18c8",
+  "theme_color": "#0a18c8",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "screenshots": [
+    { "src": "og-image.png", "sizes": "1200x630", "type": "image/png", "form_factor": "wide", "label": "GitDOS — DOS поверх GitHub" },
+    { "src": "screenshot-narrow.png", "sizes": "600x800", "type": "image/png", "form_factor": "narrow", "label": "GitDOS" }
+  ]
+}
