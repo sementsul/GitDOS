@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="10" fill="#0a18c8"/>
+  <rect x="8" y="11" width="48" height="36" rx="3" fill="#0d1117" stroke="#c0c0c0" stroke-width="2"/>
+  <text x="13" y="36" font-family="Consolas,'Courier New',monospace" font-size="17" font-weight="bold" fill="#39d353">C:\&gt;</text>
+  <rect x="44" y="23" width="8" height="13" fill="#39d353"/>
+  <rect x="24" y="49" width="16" height="4" fill="#c0c0c0"/>
+  <rect x="28" y="51" width="8" height="7" fill="#808080"/>
+</svg>
