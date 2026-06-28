@@ -1,9 +1,9 @@
 {
-  "name": "GitDOS Hello (test)",
-  "id": "hello",
-  "dir": "HELLO",
-  "run": "HELLO.BAT",
+  "name": "RAR",
+  "id": "rar",
+  "dir": "RAR",
+  "run": "RAR.EXE",
   "path": true,
-  "version": "1.0",
-  "desc": "Тестовая программа: проверяет, что INSTALL/UNINSTALL работают."
+  "version": "1.51",
+  "desc": "RAR Archives (Roshal ARchive file format) are a proprietary format for storing information created by Eugene Roshal."
 }
