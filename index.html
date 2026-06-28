@@ -224,7 +224,7 @@
 
 <div class="dd-win">
   <div class="dd-topbar"><span class="ico">🐙</span><h1>GitDOS</h1>
-    <span class="dd-ver"><span data-i18n="tagline">Твой DOS живёт в репозитории</span> · сборка 120</span>
+    <span class="dd-ver"><span data-i18n="tagline">Твой DOS живёт в репозитории</span> · сборка 138</span>
     <span id="apiLimit" class="dd-apilimit" title=""></span>
     <span style="margin-left:8px;display:flex;gap:4px">
       <button id="langRu" class="dd-btn" type="button" style="min-height:0;padding:1px 8px">RU</button>
@@ -266,6 +266,10 @@
           <div class="dd-cmdbar">
             <span class="dd-cmdprompt">C:\&gt;</span>
             <input id="cmdInput" type="text" name="dos-command" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore data-bwignore data-form-type="other" readonly data-i18n-ph="cmdPh" placeholder="введите команду DOS и Enter (можно вставить текст)">
+            <button id="wakeBtn" class="dd-btn" type="button" title="Постоянное прослушивание триггерной фразы (computer … / assistant …). Нужен интернет; звук уходит на сервер распознавания">🎧</button>
+            <button id="voiceCmdBtn" class="dd-btn" type="button" title="Голосом — продиктовать команду DOS в поле ввода (Enter — выполнить)">🎙️</button>
+            <button id="voiceBtn" class="dd-btn" type="button" title="Голосом — продиктовать задачу ассистенту">🎤</button>
+            <button id="recBtn" class="dd-btn" type="button" title="Запись экрана DOS в видео (WebM) — старт/стоп">⏺</button>
             <button id="cmdSend" class="dd-btn" type="button" title="Выполнить в DOS">▶</button>
           </div>
           <div class="dd-logh"><span data-i18n="logTitle">Лог</span><button id="clearLog" class="dd-btn dd-ghost" type="button" data-i18n="btnClear">очистить</button></div>
@@ -403,8 +407,65 @@
             <label style="display:flex;gap:7px;align-items:flex-start;margin-top:8px;color:var(--fg)">
               <input type="checkbox" id="aiAsk"> <span data-i18n="lblAiAsk">Задаёт уточняющие вопросы (всплывают диалогом). Без галочки — решает сам и делает разумные допущения.</span>
             </label>
+            <label style="display:flex;gap:7px;align-items:flex-start;margin-top:8px;color:var(--fg)">
+              <input type="checkbox" id="aiTts"> <span data-i18n="lblAiTts">🔊 Озвучивать ответы ассистента голосом (TTS, синтез речи браузера). Ответы английские → озвучка en-US.</span>
+            </label>
+            <label style="display:flex;gap:7px;align-items:flex-start;margin-top:8px;color:var(--fg)">
+              <input type="checkbox" id="aiMemory"> <span data-i18n="lblAiMemory">🧠 Долговременная память: ассистент помнит факты между сессиями (файл AIMEMO.TXT в репозитории, директива MEMO).</span>
+            </label>
+            <label style="display:flex;gap:7px;align-items:flex-start;margin-top:8px;color:var(--fg)">
+              <input type="checkbox" id="aiVision"> <span data-i18n="lblAiVision">👁️ Ассистент видит экран: к запросу прикладывается снимок экрана DOS (vision-модель). Больше токенов/стоимость. Директива LOOK обновляет снимок.</span>
+            </label>
+            <button id="aiMemView" class="dd-btn dd-ghost" type="button" style="margin-top:6px" data-i18n="btnMemView">🧠 Показать / очистить память</button>
             <label data-i18n="lblAiSteps" style="margin-top:8px">Лимит шагов агента (0 = без лимита)</label>
             <input id="aiSteps" type="number" min="0" max="99" autocomplete="off" placeholder="5" style="max-width:120px">
+            <hr style="border:none;border-top:1px solid var(--sh);margin:12px 0">
+            <label class="dd-first" data-i18n="lblAiMacros" style="margin-top:0">🎯 Макросы ассистента (запуск из DOS: <code>AIMACRO имя</code>)</label>
+            <div class="dd-hint" style="margin-top:4px" data-i18n="hintAiMacros">Сохранённые задачи. В DOS: <code>AIMACRO</code> — список, <code>AIMACRO имя</code> — запустить. Имя — одно слово (англ./цифры).</div>
+            <div id="aiMacroList" style="margin-top:8px"></div>
+            <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+              <input id="aiMacroName" type="text" autocomplete="off" data-i18n-ph="phMacroName" placeholder="имя (одно слово)" style="max-width:160px">
+            </div>
+            <textarea id="aiMacroTask" rows="2" data-i18n-ph="phMacroTask" placeholder="текст задачи для ассистента…" style="width:100%;margin-top:6px;box-sizing:border-box"></textarea>
+            <button id="aiMacroAdd" class="dd-btn" type="button" style="margin-top:6px" data-i18n="btnMacroAdd">➕ Сохранить макрос</button>
+            <hr style="border:none;border-top:1px solid var(--sh);margin:12px 0">
+            <label class="dd-first" data-i18n="lblWake" style="margin-top:0">🎧 Триггерные фразы (кнопка 🎧 — постоянное прослушивание)</label>
+            <div class="dd-hint" style="margin-top:4px" data-i18n="hintWake">⚠️ Нужен интернет; звук непрерывно уходит на сервер распознавания (приватность). Скажи «фраза-команды DIR» или «фраза-ассистента вопрос». Включается кнопкой 🎧 у поля ввода.</div>
+            <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+              <div style="flex:1;min-width:130px"><label style="margin-top:0" data-i18n="lblWakeCmd">Фраза — команда DOS</label>
+                <input id="aiWakeCmd" type="text" autocomplete="off" placeholder="git, гит" style="width:100%;box-sizing:border-box"></div>
+              <div style="flex:1;min-width:130px"><label style="margin-top:0" data-i18n="lblWakeAi">Фраза — ассистент</label>
+                <input id="aiWakeAi" type="text" autocomplete="off" placeholder="макс, max" style="width:100%;box-sizing:border-box"></div>
+            </div>
+            <hr style="border:none;border-top:1px solid var(--sh);margin:12px 0">
+            <label class="dd-first" data-i18n="lblSched" style="margin-top:0">⏰ Планировщик задач ассистента</label>
+            <div class="dd-hint" style="margin-top:4px" data-i18n="hintSched">Задачи запускаются автоматически: «при старте диска» или «каждые N минут». Нужен включённый диск и API-ключ.</div>
+            <div id="aiSchedList" style="margin-top:8px"></div>
+            <textarea id="aiSchedTask" rows="2" data-i18n-ph="phSchedTask" placeholder="текст задачи для ассистента…" style="width:100%;margin-top:8px;box-sizing:border-box"></textarea>
+            <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;align-items:center">
+              <select id="aiSchedTrig" style="max-width:170px">
+                <option value="start" data-i18n="schedStart">при старте диска</option>
+                <option value="interval" data-i18n="schedInterval">каждые N минут</option>
+              </select>
+              <input id="aiSchedMin" type="number" min="1" max="1440" autocomplete="off" placeholder="30" style="max-width:90px" disabled>
+              <button id="aiSchedAdd" class="dd-btn" type="button" data-i18n="btnSchedAdd">➕ Добавить</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Сетевая игра (IPX) -->
+        <div class="dd-step">
+          <div class="dd-step-h"><span class="dd-num">🌐</span> <span data-i18n="stepNet">Сетевая игра (IPX)</span></div>
+          <div class="dd-card">
+            <div class="dd-hint" style="margin-top:0" data-i18n="hintNet">Мультиплеер для IPX-игр DOS (Doom, Duke3D, Warcraft…). Два игрока с одинаковой «комнатой» соединяются через relay. Игра должна быть на диске; в самой игре выбери сетевой режим IPX.</div>
+            <label style="display:flex;gap:7px;align-items:flex-start;margin-top:10px;color:var(--fg)">
+              <input type="checkbox" id="netOn"> <span data-i18n="lblNetOn">Включить сеть IPX (применяется при следующем «Пуск»)</span>
+            </label>
+            <label data-i18n="lblNetRoom" style="margin-top:8px">Комната (общий код для игроков)</label>
+            <input id="netRoom" type="text" autocomplete="off" placeholder="gitdos-doom-42" style="max-width:260px">
+            <label data-i18n="lblNetBackend" style="margin-top:8px">Relay-сервер (WebSocket)</label>
+            <input id="netBackend" type="text" autocomplete="off" placeholder="wss://netherlands.dos.zone" style="max-width:320px">
+            <div class="dd-hint" style="margin-top:8px;color:#a05a00" data-i18n="warnNet">⚠️ Публичный relay — внешний сервис: трафик игры идёт через сторонний сервер. Нужен интернет. Для приватности можно указать свой relay.</div>
           </div>
         </div>
 
@@ -464,6 +525,21 @@
       <div class="dd-hint" style="margin-top:0" data-i18n="aiFileHint">Выбери текстовый файл (.txt/.md) с задачей — его содержимое уйдёт ассистенту. Удобно для длинных задач (в DOS-команде AI слов мало).</div>
       <div class="dd-drop" id="aiDrop" data-i18n-html="aiFileDrop">Перетащи файл задачи сюда<br>или <u>нажми, чтобы выбрать</u></div>
       <input id="aiFileInput" type="file" accept=".txt,.md,.bat,.ini,text/*" hidden>
+    </div>
+  </div>
+</div>
+
+<!-- окно: предпросмотр записи экрана -->
+<div class="dd-modal" id="recModal">
+  <div class="dd-modal-box" style="width:680px;max-width:94vw">
+    <div class="dd-modal-h"><b data-i18n="mRec">📼 Запись сессии</b><button class="dd-btn dd-modalclose" data-close="recModal" type="button">✕</button></div>
+    <div class="dd-wiz-body" style="max-height:none">
+      <div class="dd-hint" style="margin-top:0" data-i18n="recHint">Запись экрана DOS (видео WebM). Можно проиграть здесь, скачать и поделиться файлом.</div>
+      <video id="recVideo" controls playsinline style="width:100%;margin-top:8px;background:#000;border:1px solid var(--sh)"></video>
+      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+        <a id="recDownload" class="dd-btn" download="gitdos-session.webm" data-i18n="btnRecDownload">⬇️ Скачать .webm</a>
+        <span id="recInfo" class="dd-hint" style="margin:0;align-self:center"></span>
+      </div>
     </div>
   </div>
 </div>
@@ -623,6 +699,19 @@
 
         <h3>Ассистент Claude (команда AI)</h3>
         <p>В DOS: <code>AI &lt;вопрос&gt;</code> — спросить ассистента (модель Claude). Хост отправляет запрос напрямую в Anthropic API (<code>api.anthropic.com/v1/messages</code> с заголовком <code>anthropic-dangerous-direct-browser-access</code>), ответ печатается прямо в <b>DOS-терминал построчно через <code>ECHO</code></b> (без перемонтирования/ребута) и дублируется в консоль (зелёный лог, <code>🤖 …</code>); там же видны ошибки API — <code>❌ Anthropic API: …</code> и <code>❌ GitHub: …</code>. Поскольку ответ набирается в терминал клавишами, ассистент отвечает очень кратко (≤6 строк); директивы (RUN/INSTALL/ASK) в терминал не печатаются. Ключ и модель задаются в «⚙️ Общие настройки» → «🤖 Ассистент». При <b>включённом авто-выполнении</b> работает <b>агент-цикл с обратной связью</b>: ассистент выполняет команду, хост перехватывает её вывод (редирект <code>команда &gt; C:\AIOUT.TXT</code> + маркер завершения <code>AIDONE</code>) и возвращает ассистенту следующим сообщением — тот видит результат и решает следующий шаг. <b>Лимит шагов</b> настраивается в «🤖 Ассистент» (по умолчанию 5; <code>0 = без лимита</code> — тогда цикл идёт, пока ассистент сам не остановится, с резервным потолком 99 от зацикливания). Без авто-выполнения — один ответ-совет (без выполнения). <b>Режим вопросов</b> (настройка «задаёт уточняющие вопросы»): включён — ассистент может задать уточняющий вопрос (директива <code>ASK:</code>, всплывает диалогом, твой ответ возвращается ему и он продолжает); выключен — решает сам и делает разумные допущения, не спрашивая. Ассистент <b>может управлять программами</b>: в запрос подмешивается список из каталога INSTALL (что доступно и что уже установлено), а ассистент действует директивами <code>INSTALL: &lt;id&gt;</code> / <code>UNINSTALL: &lt;id&gt;</code> (хост ставит/удаляет напрямую) и <code>RUN: &lt;команда&gt;</code>. Если ассистент предлагает команды: по умолчанию первая кладётся в поле ввода под экраном — ты сам решаешь, запускать (Enter). В настройках есть тумблер <b>«Авто-выполнение»</b> — тогда ассистент <b>сам запускает</b> все предложенные команды (для автоматизации): после показа ответа диск перемонтируется, и команды выполняются по готовности DOS (очередь <code>pendingCmds</code> на <code>ci-ready</code>). ⚠️ Авто-выполнение AI-команд рискованно (ассистент может выполнить нежелательную команду) — по умолчанию выключено. <b>Безопасность:</b> API-ключ — секрет, хранится только в браузере (localStorage), в код/коммиты не попадает; запросы идут из браузера (ключ виден) и платные — для личного использования. Ответ — ASCII/English (DOS = CP437). Вопрос — до ~9 слов (ограничение DOS-аргументов); длинные удобнее слать через поле ввода команд или командой <code>AIFILE</code> — она открывает окно выбора текстового файла (.txt/.md), и его содержимое целиком уходит ассистенту как задача (обходит лимит аргументов DOS).</p>
+        <p><b>🎤 / 🎙️ Голосовой ввод</b> (Web Speech API браузера, нужен Chrome/Edge и доступ к микрофону). Две кнопки у поля ввода: <b>🎤</b> — продиктовать <b>задачу ассистенту</b> (распознаётся по языку интерфейса RU/EN; текст сразу уходит ассистенту). <b>🎙️</b> — продиктовать <b>команду DOS в поле ввода</b>: распознаётся <b>по-английски</b> (DOS-команды английские), переводится в ВЕРХНИЙ регистр, слова-символы заменяются (<code>backslash</code>→<code>\</code>, <code>star</code>→<code>*</code>, <code>dot</code>→<code>.</code>), результат кладётся в поле — ты проверяешь и жмёшь <b>Enter</b> (авто-запуска нет: распознавание неидеально). Повторный клик той же кнопки отменяет запись. <b>Из DOS</b> голос вызывается командой <code>VOICE</code> (команда DOS голосом) или <code>VOICE AI</code> (задача ассистенту) — хост нажимает соответствующий микрофон. <b>Вывод идёт в сам DOS-терминал:</b> при <code>VOICE</code> распознанная команда печатается в терминал и <b>сразу выполняется</b> (её результат виден в консоли); при <code>VOICE AI</code> в терминал печатается и услышанный вопрос (<code>You said: …</code>), и ответ ассистента (через <code>ECHO</code>). ⚠️ Поскольку <code>VOICE</code> выполняет распознанное автоматически, а распознавание неидеально — будь аккуратен (через веб-кнопку 🎙️ команда не выполняется, а кладётся в поле на проверку). ⚠️ Браузеры включают микрофон обычно только по «живому» клику, поэтому запуск из DOS — <b>best-effort</b>: если микрофон не стартовал, нажми кнопку 🎙️/🎤 один раз (после выданного разрешения часть браузеров пускает и из команды).</p>
+        <p><b>🎧 Триггерная фраза (wake word, «как OK Google»).</b> Кнопка <b>🎧</b> у поля ввода включает <b>постоянное прослушивание</b>. Микрофон слушает непрерывно, и когда услышит твою фразу — выполняет: <b>«git dir»</b> → команда DOS <code>DIR</code> в терминале; <b>«макс что такое DIR»</b> → задача ассистенту. Фразы-триггеры настраиваются в «🤖 Ассистент» (по умолчанию <code>git</code> для команд DOS и <code>макс</code> для ассистента; можно несколько <b>синонимов через запятую</b>, напр. <code>git, гит</code> и <code>макс, max</code> — т.к. распознаватель по-русски выдаёт кириллицу). Тело команды <b>транслитерируется кир→лат</b> («дир» → <code>DIR</code>) и поддерживает слова-символы (<code>слэш</code>/<code>slash</code>→<code>/</code>, <code>точка</code>/<code>dot</code>→<code>.</code>). Повторный клик 🎧 выключает. Распознавание идёт по языку интерфейса (RU/EN). ⚠️ <b>Важно:</b> постоянное прослушивание <b>требует интернета</b> и <b>непрерывно отправляет звук на сервер распознавания браузера</b> (Google для Chrome) — это приватность и трафик; включается только по клику (жест браузера); браузер периодически обрывает поток — мы перезапускаем его в цикле, но при сворачивании вкладки/потере сети прослушивание остановится (увидишь <code>🎧 ошибка: …</code>). На время ручного 🎤/🎙️ или команды <code>VOICE</code> wake-прослушивание ставится на паузу и возобновляется после.</p>
+        <p><b>🔊 Озвучка ответов (TTS).</b> В «🤖 Ассистент» галочка «Озвучивать ответы голосом» включает синтез речи браузера (<code>speechSynthesis</code>): ответ ассистента не только печатается в терминал, но и проговаривается (язык <code>en-US</code> — ответы английские). Вместе с wake-фразой «макс» получается полный голосовой цикл: позвал голосом → услышал ответ голосом. На время озвучки wake-микрофон не реагирует (флаг <code>aiSpeaking</code>), чтобы не ловить собственный голос. Работает офлайн (синтез локальный, в отличие от распознавания).</p>
+        <p><b>🧠 Долговременная память.</b> Галочка в «🤖 Ассистент» включает память: ассистент помнит факты между сессиями. Память хранится в файле <code>AIMEMO.TXT</code> в корне диска (автосохраняется в репозиторий — переживает перезапуск и доступна на любом устройстве). В начале каждой задачи память подмешивается в контекст; ассистент дописывает заметки директивой <code>MEMO: &lt;факт&gt;</code> (хост добавляет строку в файл). Кнопка «🧠 Показать / очистить память» — посмотреть содержимое и при желании стереть. Пример: скажешь «макс, запомни что я предпочитаю Norton Commander» → в следующих сессиях он это учтёт.</p>
+        <p><b>⏰ Планировщик задач.</b> В «🤖 Ассистент» можно завести задачи, которые запускаются <b>сами</b>: триггер <b>«при старте диска»</b> (выполнится после монтирования C:) или <b>«каждые N минут»</b> (таймер проверяет раз в 30 с, запускает одну задачу за тик). Задача = обычный промт ассистенту (идёт через тот же агент-цикл, с учётом режимов авто-выполнения/памяти). Нужен включённый диск и API-ключ. Кнопка ▶ у задачи — запустить вручную сейчас. Пример: «каждые 60 минут — закоммить изменения» (вместе с авто-выполнением и директивой COMMIT).</p>
+        <p><b>💾 Само-коммит.</b> При <b>авто-выполнении</b> ассистент может сам сохранять состояние диска в git директивой <code>COMMIT: &lt;сообщение&gt;</code> (то же, что <code>GITDOS COMMIT</code> — пуш изменённых/новых файлов с этим сообщением). Полезно в связке с планировщиком (периодические бэкапы) и в конце автоматических задач.</p>
+        <p><b>🛠️ AI-IDE: пиши → компилируй → чини.</b> При <b>авто-выполнении</b> ассистент может разрабатывать программы прямо в DOS. Раньше записанный через <code>MAKE</code> файл становился виден DOS только в конце; теперь после каждого <code>MAKE</code> диск <b>перемонтируется с ожиданием готовности</b> (<code>remountAndWait</code>) — и на следующем шаге ассистент может <b>скомпилировать</b> исходник: <code>RUN: TPC PROG.PAS</code> (Turbo Pascal) или <code>RUN: TCC PROG.C</code> (Turbo C). Вывод компилятора перехватывается (как и любой команды: редирект в <code>AIOUT.TXT</code> + маркер <code>AIDONE</code>) и возвращается ассистенту — он <b>видит ошибки компиляции</b>, правит исходник новым <code>MAKE</code> и компилирует снова, пока не соберётся. Тот же цикл работает и с <code>.BAT</code>-скриптами (написал — перемонтировал — запустил — увидел вывод). ⚠️ Нужен <b>установленный DOS-компилятор</b> (через <code>INSTALL</code> или загрузку файлов) — GitDOS их не поставляет (лицензии/размер). Каждый <code>MAKE</code> = перезагрузка DOSBox (~2–3 с), поэтому держи исходники компактными и итераций — разумное число (лимит шагов агента в настройках).</p>
+        <p><b>👁️ Ассистент видит экран (vision).</b> Галочка в «🤖 Ассистент». Когда включена, к запросу прикладывается <b>снимок текущего экрана DOS</b> (canvas → PNG, уменьшенный до 640px), и ассистент реально <b>видит</b>, что на экране — меню игры, сообщение об ошибке, текст программы, — а не только вывод команд. В авто-режиме ассистент может директивой <code>LOOK:</code> запросить свежий снимок после действия (хост перехватывает экран и отправляет картинкой следующим сообщением). Технически: js-dos рендерит в WebGL без сохранения кадра, поэтому GitDOS патчит <code>getContext</code> (<code>preserveDrawingBuffer</code>), иначе снимок был бы пустым. ⚠️ Картинки <b>увеличивают расход токенов</b> (стоимость) — включай по необходимости; нужна vision-модель (Claude Haiku/Sonnet/Opus её поддерживают).</p>
+        <p><b>📼 Запись сессии.</b> Кнопка <b>⏺</b> у поля ввода записывает <b>экран DOS в видео</b> (WebM, через <code>canvas.captureStream</code> + <code>MediaRecorder</code>, 15 кадров/с). Нажми ⏺ — пошла запись (кнопка станет ⏹), нажми ещё раз — откроется окно с <b>предпросмотром</b> (можно проиграть прямо тут) и кнопкой <b>скачать .webm</b>. Готовый файл можно отправить/выложить как туториал или демо. Запись только видео (без звука DOS). Останавливается автоматически при остановке диска. Поддерживается в Chrome/Edge (нужен MediaRecorder).</p>
+        <h3>🌐 Сетевая игра (IPX мультиплеер)</h3>
+        <p>js-dos умеет соединять IPX-сеть DOSBox через WebSocket-relay, так что в DOS-игры с сетевым режимом IPX (Doom, Duke Nukem 3D, Warcraft, Descent…) можно играть <b>по интернету</b>. Настройка — «⚙️ Общие настройки → 🌐 Сетевая игра (IPX)»: галочка <b>включить</b>, <b>комната</b> (общий код — у всех игроков одинаковый) и <b>relay-сервер</b> (по умолчанию публичный <code>wss://netherlands.dos.zone</code>). Параметры применяются при следующем <b>«Пуск»</b> (передаются в эмулятор как <code>ipx=1 / ipxBackend / room</code>); в логе видно <code>🌐 Сеть IPX подключена/отключена</code>. Игра должна быть на диске, и <b>внутри самой игры</b> нужно выбрать сетевой режим <b>IPX</b> (не модем/COM). По умолчанию сеть <b>выключена</b> — ничего наружу не уходит, пока ты сам не включишь. ⚠️ <b>Публичный relay — внешний сервис:</b> игровой трафик идёт через сторонний сервер, нужен интернет. Для приватности можно указать <b>свой</b> relay-сервер в том же поле.</p>
+        <p><b>📝 Генерация файлов (<code>MAKE:</code>).</b> При включённом <b>авто-выполнении</b> ассистент может создавать файлы на диске: в ответе он пишет строку <code>MAKE: путь</code> (например <code>MAKE: HELLO.BAT</code>), затем содержимое файла, и завершает строкой <code>ENDMAKE</code>. Хост записывает файл в репозиторий и <b>перемонтирует диск</b>, чтобы новый файл появился в DOS (проверь <code>DIR</code>). Так ассистент пишет <code>.BAT</code>-скрипты и текстовые файлы по запросу («напиши bat, который выводит дату» и т.п.). Без авто-выполнения <code>MAKE</code> не исполняется (только показывается).</p>
+        <p><b>🎯 Макросы (<code>AIMACRO</code>).</b> Сохранённые задачи-заготовки. В «🤖 Ассистент» задаёшь <b>имя</b> (одно слово) и <b>текст задачи</b> — он сохраняется в браузере (localStorage). В DOS: <code>AIMACRO</code> — список макросов, <code>AIMACRO имя</code> — запустить макрос (его текст уходит ассистенту как задача). Запустить можно и кнопкой <b>▶</b> прямо в настройках. Удобно для частых задач (бэкап, генерация отчёта, уборка временных файлов и т.п.).</p>
 
         <h3>Команда INSTALL (пакетный менеджер программ)</h3>
         <p>В DOS из любой папки: <code>INSTALL</code> — список доступных программ (по категориям, <code>*</code> = установлена); <code>INSTALL &lt;id&gt;</code> — установить. Программы берутся из репозитория проекта <b>sementsul/GitDOS</b>, папка <code>programs/&lt;категория&gt;/&lt;id&gt;/</code> (с манифестом <code>install.json</code>). Установка: файлы качаются в <code>C:\PROGRAMS\&lt;dir&gt;</code>, путь добавляется в <code>PATH</code> (управляемый блок <code>REM GITDOS:&lt;id&gt;</code> в AUTOEXEC.BAT, идемпотентно), плюс строки <code>autoexec</code>/<code>config</code> из манифеста; затем диск перемонтируется. Установленное уходит в твой репозиторий автосохранением. Чтение каталога — через raw (лимит API не тратит). Формат и пример — в <code>programs/README.md</code> репозитория. <code>INSTALL INFO &lt;id&gt;</code> — карточка программы (версия, размер, описание, что пропишется в конфиги) перед установкой; в манифесте можно задать <code>desc</code> и <code>version</code>. <b>Источник каталога настраивается</b> в «⚙️ Общие настройки» → «🧩 Каталог программ» (<code>owner/repo</code> или <code>owner/repo/подпапка</code>, по умолчанию <code>sementsul/GitDOS/programs</code>) — можно держать отдельный репозиторий-каталог. ⚠️ Указывай только доверенный источник (манифест может править AUTOEXEC/CONFIG).</p>
@@ -761,6 +850,13 @@ window.addEventListener('unhandledrejection', function(ev){ var d=document.getEl
 const $ = id => document.getElementById(id);
 function log(msg, cls){ const d=$('log'); if(!d) return; const l=document.createElement('div');
   if(cls) l.className=cls; l.textContent='» '+msg; d.appendChild(l); d.scrollTop=d.scrollHeight; }
+// для «vision» (снимок экрана DOS): js-dos рендерит в WebGL без preserveDrawingBuffer -> toDataURL пуст.
+// патчим getContext, чтобы кадр сохранялся и его можно было захватить. Небольшая цена в производительности.
+(function(){ try{ const orig=HTMLCanvasElement.prototype.getContext;
+  HTMLCanvasElement.prototype.getContext=function(type, attrs){
+    if(type==='webgl'||type==='webgl2'||type==='experimental-webgl') attrs=Object.assign({preserveDrawingBuffer:true}, attrs||{});
+    return orig.call(this, type, attrs); }; }catch(_){}
+})();
 
 // ---------- base64 / бинарь ----------
 function b64(bytes){ let s=''; const ch=0x8000; for(let i=0;i<bytes.length;i+=ch) s+=String.fromCharCode.apply(null, bytes.subarray(i,i+ch)); return btoa(s); }
@@ -814,7 +910,7 @@ const I18N = {
     stepMountSel:'Что монтировать (выборочно)', hintMountSel:'Чтобы большой диск стартовал быстрее, можно не грузить тяжёлые папки. Сними галочки — эти папки/файлы не попадут на диск при «Пуск» (в репозитории они остаются и не удаляются).', btnMountSelLoad:'Показать содержимое диска C:',
     stepManifest:'Манифест .gitdos.json', hintManifest:'Необязательный файл .gitdos.json в корне диска: имя диска (в заголовок), что запускать (run) и скорость CPU (cycles). С ним диск стартует сразу в нужную программу.', btnManifest:'📦 Создать шаблон .gitdos.json',
     stepCatalog:'Каталог программ (INSTALL)', hintCatalog:'Откуда DOS-команда INSTALL берёт программы: owner/repo или owner/repo/подпапка. По умолчанию — каталог проекта GitDOS.',
-    stepAi:'Ассистент (Claude)', hintAi:'Команда AI в DOS спрашивает Claude. Нужен API-ключ Anthropic. ⚠️ Ключ хранится только в браузере, запросы идут напрямую на api.anthropic.com (ключ виден в браузере — для личного использования) и платные.', lblAiKey:'API-ключ Anthropic', lblAiModel:'Модель', lblAiRun:'⚠️ Авто-выполнение: ассистент сам запускает предложенные команды в DOS (для автоматизации). Без галочки — команда кладётся в поле ввода на твоё подтверждение.', lblAiSteps:'Лимит шагов агента (0 = без лимита)', lblAiAsk:'Задаёт уточняющие вопросы (всплывают диалогом). Без галочки — решает сам и делает разумные допущения.',
+    stepAi:'Ассистент (Claude)', hintAi:'Команда AI в DOS спрашивает Claude. Нужен API-ключ Anthropic. ⚠️ Ключ хранится только в браузере, запросы идут напрямую на api.anthropic.com (ключ виден в браузере — для личного использования) и платные.', lblAiKey:'API-ключ Anthropic', lblAiModel:'Модель', lblAiRun:'⚠️ Авто-выполнение: ассистент сам запускает предложенные команды в DOS (для автоматизации). Без галочки — команда кладётся в поле ввода на твоё подтверждение.', lblAiSteps:'Лимит шагов агента (0 = без лимита)', lblAiAsk:'Задаёт уточняющие вопросы (всплывают диалогом). Без галочки — решает сам и делает разумные допущения.', lblAiTts:'🔊 Озвучивать ответы ассистента голосом (TTS, синтез речи браузера). Ответы английские → озвучка en-US.', lblAiMacros:'🎯 Макросы ассистента (запуск из DOS: AIMACRO имя)', hintAiMacros:'Сохранённые задачи. В DOS: AIMACRO — список, AIMACRO имя — запустить. Имя — одно слово (англ./цифры).', phMacroName:'имя (одно слово)', phMacroTask:'текст задачи для ассистента…', btnMacroAdd:'➕ Сохранить макрос', macroEmpty:'Макросов пока нет', macroDel:'удалить', macroRun:'запустить', lblWake:'🎧 Триггерные фразы (кнопка 🎧 — постоянное прослушивание)', hintWake:'⚠️ Нужен интернет; звук непрерывно уходит на сервер распознавания (приватность). По умолчанию: «git DIR» — команда DOS, «макс вопрос» — ассистенту. Можно несколько синонимов через запятую (латиница+кириллица). Включается кнопкой 🎧 у поля ввода.', lblWakeCmd:'Фраза — команда DOS', lblWakeAi:'Фраза — ассистент', lblAiMemory:'🧠 Долговременная память: ассистент помнит факты между сессиями (файл AIMEMO.TXT в репозитории, директива MEMO).', lblAiVision:'👁️ Ассистент видит экран: к запросу прикладывается снимок экрана DOS (vision-модель). Больше токенов/стоимость. Директива LOOK обновляет снимок.', btnMemView:'🧠 Показать / очистить память', lblSched:'⏰ Планировщик задач ассистента', hintSched:'Задачи запускаются автоматически: «при старте диска» или «каждые N минут». Нужен включённый диск и API-ключ.', phSchedTask:'текст задачи для ассистента…', schedStart:'при старте диска', schedInterval:'каждые N минут', btnSchedAdd:'➕ Добавить', schedEmpty:'Задач пока нет', schedDel:'удалить', stepNet:'Сетевая игра (IPX)', hintNet:'Мультиплеер для IPX-игр DOS (Doom, Duke3D, Warcraft…). Два игрока с одинаковой «комнатой» соединяются через relay. Игра должна быть на диске; в самой игре выбери сетевой режим IPX.', lblNetOn:'Включить сеть IPX (применяется при следующем «Пуск»)', lblNetRoom:'Комната (общий код для игроков)', lblNetBackend:'Relay-сервер (WebSocket)', warnNet:'⚠️ Публичный relay — внешний сервис: трафик игры идёт через сторонний сервер. Нужен интернет. Для приватности можно указать свой relay.',
     stepSysEdit:'Загрузочные файлы', hintSysEdit:'Правка AUTOEXEC.BAT и CONFIG.SYS прямо в браузере — что выполняется при старте диска и драйверы DOS.', btnSysEdit2:'⚙️ Редактировать AUTOEXEC.BAT / CONFIG.SYS',
     mSysEdit:'⚙️ AUTOEXEC.BAT и CONFIG.SYS', sysHint:'Загрузочные файлы диска C:. Изменения сохраняются в репозиторий (нужен токен) или на запущенный диск. Применяются при следующем «Пуск».', btnSysReload:'↻ Перечитать', btnSysSave:'💾 Сохранить',
     mScreen:'🖥️ Экран и DOSBox', lblCycles:'Скорость CPU (cycles)', hintCycles:'Применяется при следующем «Пуск». Если в .gitdos.json задан свой cycles — он важнее.', btnMute:'🔊 Звук: вкл',
@@ -830,7 +926,7 @@ const I18N = {
     btnDownload:'⬇ Скачать GitDOS (zip)',
     fmNew:'📁 Новая папка', fmTargetLbl:'Файлы попадут в:', fmRunFirst:'Запусти диск («Пуск»), чтобы выбирать папки. Сейчас — в корень C:.', fmNoFolders:'(папок нет)', fmPrompt:'Имя новой папки:',
     btnReset:'🗑 Сбросить данные и перезагрузить', resetConfirm:'Сбросить все локальные данные (репозиторий, токен, язык, настройки) и перезагрузить страницу?',
-    mAiFile:'🤖 Задача для ассистента из файла', aiFileHint:'Выбери текстовый файл (.txt/.md) с задачей — его содержимое уйдёт ассистенту. Удобно для длинных задач (в DOS-команде AI слов мало).', aiFileDrop:'Перетащи файл задачи сюда<br>или <u>нажми, чтобы выбрать</u>'
+    mAiFile:'🤖 Задача для ассистента из файла', aiFileHint:'Выбери текстовый файл (.txt/.md) с задачей — его содержимое уйдёт ассистенту. Удобно для длинных задач (в DOS-команде AI слов мало).', aiFileDrop:'Перетащи файл задачи сюда<br>или <u>нажми, чтобы выбрать</u>', mRec:'📼 Запись сессии', recHint:'Запись экрана DOS (видео WebM). Можно проиграть здесь, скачать и поделиться файлом.', btnRecDownload:'⬇️ Скачать .webm'
   },
   en: {
     tagline:'your DOS lives in a repo', navDisks:'⚙️ General settings', navUpload:'📤 Upload files',
@@ -858,7 +954,7 @@ const I18N = {
     stepMountSel:'What to mount (selective)', hintMountSel:'To make a large disk start faster, you can skip heavy folders. Uncheck them — those folders/files won’t be loaded on Run (they stay in the repository and are not deleted).', btnMountSelLoad:'Show disk C: contents',
     stepManifest:'.gitdos.json manifest', hintManifest:'Optional .gitdos.json in the disk root: disk name (title bar), what to run (run) and CPU speed (cycles). With it the disk boots straight into the program.', btnManifest:'📦 Create .gitdos.json template',
     stepCatalog:'Program catalog (INSTALL)', hintCatalog:'Where the DOS INSTALL command takes programs from: owner/repo or owner/repo/subpath. Default — the GitDOS project catalog.',
-    stepAi:'Assistant (Claude)', hintAi:'The AI command in DOS asks Claude. Needs an Anthropic API key. ⚠️ The key is stored only in the browser, requests go directly to api.anthropic.com (key is visible in the browser — for personal use) and are billed.', lblAiKey:'Anthropic API key', lblAiModel:'Model', lblAiRun:'⚠️ Auto-run: the assistant runs its suggested commands in DOS itself (automation). Without it — the command goes to the input field for your confirmation.', lblAiSteps:'Agent step limit (0 = no limit)', lblAiAsk:'Ask clarifying questions (shown as a dialog). Without it — decides itself and makes reasonable assumptions.',
+    stepAi:'Assistant (Claude)', hintAi:'The AI command in DOS asks Claude. Needs an Anthropic API key. ⚠️ The key is stored only in the browser, requests go directly to api.anthropic.com (key is visible in the browser — for personal use) and are billed.', lblAiKey:'Anthropic API key', lblAiModel:'Model', lblAiRun:'⚠️ Auto-run: the assistant runs its suggested commands in DOS itself (automation). Without it — the command goes to the input field for your confirmation.', lblAiSteps:'Agent step limit (0 = no limit)', lblAiAsk:'Ask clarifying questions (shown as a dialog). Without it — decides itself and makes reasonable assumptions.', lblAiTts:'🔊 Speak assistant answers aloud (TTS, browser speech synthesis). Answers are English → en-US voice.', lblAiMacros:'🎯 Assistant macros (run from DOS: AIMACRO name)', hintAiMacros:'Saved tasks. In DOS: AIMACRO — list, AIMACRO name — run. Name = one word (latin/digits).', phMacroName:'name (one word)', phMacroTask:'task text for the assistant…', btnMacroAdd:'➕ Save macro', macroEmpty:'No macros yet', macroDel:'delete', macroRun:'run', lblWake:'🎧 Wake phrases (the 🎧 button — always-on listening)', hintWake:'⚠️ Needs internet; audio is streamed continuously to the recognition server (privacy). Defaults: “git DIR” — DOS command, “макс question” — assistant. Several synonyms allowed, comma-separated (latin+cyrillic). Toggle with the 🎧 button by the input.', lblWakeCmd:'Phrase — DOS command', lblWakeAi:'Phrase — assistant', lblAiMemory:'🧠 Long-term memory: the assistant remembers facts across sessions (file AIMEMO.TXT in the repo, MEMO directive).', lblAiVision:'👁️ The assistant sees the screen: a DOS screenshot is attached to the request (vision model). More tokens/cost. The LOOK directive refreshes the shot.', btnMemView:'🧠 Show / clear memory', lblSched:'⏰ Assistant task scheduler', hintSched:'Tasks run automatically: “on disk start” or “every N minutes”. Needs a running disk and an API key.', phSchedTask:'task text for the assistant…', schedStart:'on disk start', schedInterval:'every N minutes', btnSchedAdd:'➕ Add', schedEmpty:'No tasks yet', schedDel:'delete', stepNet:'Network game (IPX)', hintNet:'Multiplayer for IPX DOS games (Doom, Duke3D, Warcraft…). Two players with the same “room” connect via a relay. The game must be on the disk; pick IPX network mode inside the game.', lblNetOn:'Enable IPX network (applies on next “Start”)', lblNetRoom:'Room (shared code for players)', lblNetBackend:'Relay server (WebSocket)', warnNet:'⚠️ Public relay is an external service: game traffic goes through a third-party server. Needs internet. For privacy you can set your own relay.',
     stepSysEdit:'Boot files', hintSysEdit:'Edit AUTOEXEC.BAT and CONFIG.SYS in the browser — what runs at disk startup and DOS drivers.', btnSysEdit2:'⚙️ Edit AUTOEXEC.BAT / CONFIG.SYS',
     mSysEdit:'⚙️ AUTOEXEC.BAT & CONFIG.SYS', sysHint:'Boot files of disk C:. Changes are saved to the repository (token needed) or to the running disk. Applied on the next Run.', btnSysReload:'↻ Reload', btnSysSave:'💾 Save',
     mScreen:'🖥️ Screen & DOSBox', lblCycles:'CPU speed (cycles)', hintCycles:'Applied on the next Run. If .gitdos.json sets its own cycles, that wins.', btnMute:'🔊 Sound: on',
@@ -874,7 +970,7 @@ const I18N = {
     btnDownload:'⬇ Download GitDOS (zip)',
     fmNew:'📁 New folder', fmTargetLbl:'Files go to:', fmRunFirst:'Start the disk (Run) to pick folders. For now — to C: root.', fmNoFolders:'(no folders)', fmPrompt:'New folder name:',
     btnReset:'🗑 Reset data & reload', resetConfirm:'Reset all local data (repository, token, language, settings) and reload the page?',
-    mAiFile:'🤖 Assistant task from file', aiFileHint:'Pick a text file (.txt/.md) with a task — its content is sent to the assistant. Handy for long tasks (the DOS AI command takes few words).', aiFileDrop:'Drop a task file here<br>or <u>click to choose</u>'
+    mAiFile:'🤖 Assistant task from file', aiFileHint:'Pick a text file (.txt/.md) with a task — its content is sent to the assistant. Handy for long tasks (the DOS AI command takes few words).', aiFileDrop:'Drop a task file here<br>or <u>click to choose</u>', mRec:'📼 Session recording', recHint:'DOS screen recording (WebM video). Play it here, download and share the file.', btnRecDownload:'⬇️ Download .webm'
   }
 };
 const navLang = (typeof navigator!=='undefined' && navigator.language) ? navigator.language : 'en';
@@ -1078,6 +1174,14 @@ const AI_SYSTEM = 'You are a concise assistant embedded in GitDOS, a DOS (DOSBox
   + '  RUN: <dos command>        - run a non-interactive DOS command (DIR, TYPE, COPY, MD, DEL...)\n'
   + '  INSTALL: <program id>     - install a program from the catalog\n'
   + '  UNINSTALL: <program id>   - remove an installed program\n'
+  + '  MAKE: <path>              - create/overwrite a file on disk; put the file CONTENT on the following lines and end with a line: ENDMAKE\n'
+  + 'Use MAKE: to write .BAT scripts or text files (path like HELLO.BAT or TOOLS\\\\NOTE.TXT). After MAKE the disk reloads so the new file appears. MAKE runs only when auto-run is enabled.\n'
+  + '  MEMO: <note>              - save a short note to long-term memory (persists across sessions, stored in the repo). Use it to remember user preferences, facts, or what you did.\n'
+  + '  COMMIT: <message>         - commit (save) the current disk state to git with this message (auto-run only).\n'
+  + '  LOOK:                     - request a fresh screenshot of the current DOS screen (only if vision is enabled); it is sent back to you as an image.\n'
+  + 'If a screenshot of the DOS screen is attached, use it - you can SEE the actual screen (menus, errors, game state), not just command output. Use LOOK: after an action changes the screen.\n'
+  + 'If memory is provided in the context, use it. Add a MEMO: line when you learn something worth remembering next time.\n'
+  + 'CODING (when a DOS compiler is installed, e.g. Turbo Pascal TPC.EXE or Turbo C TCC.EXE): write source with MAKE: (e.g. MAKE: PROG.PAS ... ENDMAKE). After MAKE the disk remounts, so on the NEXT step you can RUN the compiler (e.g. RUN: TPC PROG.PAS), read the compiler output from the feedback, fix the source with MAKE: again, and recompile - iterate until it builds. Keep sources small.\n'
   + 'Use INSTALL:/UNINSTALL: (not RUN: INSTALL). The list of installable programs (with [installed] marks) is in the user context. GitDOS also has DOS helper commands: GITDOS (git), UPLOADS (upload files).\n'
   + 'When auto-run is enabled, each RUN command is executed and its output is sent back to you in the next message, so you can inspect results and decide the next step (multi-step automation). Do NOT use interactive programs. When the task is done, reply with a short final summary and NO more RUN lines.';
 // системный промпт + режим (интерактивный/автономный)
@@ -1094,7 +1198,39 @@ async function askAssistantMsgs(messages){
   if(!r.ok) throw new Error('Claude '+r.status+' '+(await r.text()).slice(0,160));
   const j=await r.json(); return (j.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('\n')||'(empty response)';
 }
-async function askAssistant(prompt, context){ return askAssistantMsgs([{role:'user', content: context?(context+'\n\nUser: '+String(prompt)):String(prompt)}]); }
+async function askAssistant(prompt, context, imgUrl){ const text=context?(context+'\n\nUser: '+String(prompt)):String(prompt);
+  const blk=imgUrl?imageBlock(imgUrl):null; return askAssistantMsgs([{role:'user', content: blk?[{type:'text',text},blk]:text}]); }
+// vision: снимок экрана DOS -> data URL (PNG, уменьшенный). Требует патча preserveDrawingBuffer выше
+function captureScreen(){ try{ const host=$('dos'); const c=host&&host.querySelector('canvas'); if(!c||!c.width) return null;
+    const maxW=640, scale=Math.min(1, maxW/c.width), w=Math.max(1,Math.round(c.width*scale)), h=Math.max(1,Math.round(c.height*scale));
+    const tmp=document.createElement('canvas'); tmp.width=w; tmp.height=h; const g=tmp.getContext('2d');
+    g.fillStyle='#000'; g.fillRect(0,0,w,h); g.drawImage(c,0,0,w,h); return tmp.toDataURL('image/png');
+  }catch(e){ log('👁️ снимок экрана: '+e.message,'dd-warn'); return null; } }
+// data URL -> блок изображения для Anthropic API
+function imageBlock(dataUrl){ const m=/^data:(image\/[\w.+-]+);base64,(.+)$/.exec(dataUrl||''); return m?{type:'image', source:{type:'base64', media_type:m[1], data:m[2]}}:null; }
+// ---------- запись экрана DOS в видео (MediaRecorder + canvas.captureStream) ----------
+let mediaRec=null, recChunks=[], recStartedAt=0, recUrl=null;
+function recSupported(){ const c=$('dos')&&$('dos').querySelector('canvas'); return !!(window.MediaRecorder && c && c.captureStream); }
+function recToggle(){ if(mediaRec) recStop(); else recStart(); }
+function recStart(){
+  const c=$('dos')&&$('dos').querySelector('canvas');
+  if(!c){ log(lang==='ru'?'Сначала запусти диск':'Start the disk first','dd-warn'); return; }
+  if(!window.MediaRecorder || !c.captureStream){ log(lang==='ru'?'Запись не поддерживается этим браузером':'Recording not supported by this browser','dd-warn'); return; }
+  let mime='video/webm;codecs=vp9'; if(!MediaRecorder.isTypeSupported(mime)) mime='video/webm;codecs=vp8'; if(!MediaRecorder.isTypeSupported(mime)) mime='video/webm';
+  try{ const stream=c.captureStream(15); mediaRec=new MediaRecorder(stream,{mimeType:mime}); }
+  catch(e){ log('📼 '+e.message,'dd-warn'); mediaRec=null; return; }
+  recChunks=[]; recStartedAt=Date.now();
+  mediaRec.ondataavailable=e=>{ if(e.data&&e.data.size) recChunks.push(e.data); };
+  mediaRec.onstop=()=>{ const secs=Math.round((Date.now()-recStartedAt)/1000);
+    const blob=new Blob(recChunks,{type:'video/webm'}); if(recUrl) try{ URL.revokeObjectURL(recUrl); }catch(_){}
+    recUrl=URL.createObjectURL(blob);
+    const v=$('recVideo'), a=$('recDownload'); if(v) v.src=recUrl; if(a) a.href=recUrl;
+    const kb=Math.round(blob.size/1024); if($('recInfo')) $('recInfo').textContent=secs+(lang==='ru'?' с · ':' s · ')+kb+' КБ';
+    log('📼 '+(lang==='ru'?'Запись готова: ':'Recording ready: ')+secs+(lang==='ru'?' с, ':' s, ')+kb+' КБ'); openModal('recModal'); };
+  mediaRec.start(); $('recBtn')&&$('recBtn').classList.add('dd-on'); $('recBtn')&&($('recBtn').textContent='⏹');
+  log('📼 '+(lang==='ru'?'Запись экрана пошла…':'Recording started…')); }
+function recStop(){ if(!mediaRec) return; try{ mediaRec.stop(); }catch(_){} mediaRec=null;
+  $('recBtn')&&$('recBtn').classList.remove('dd-on'); $('recBtn')&&($('recBtn').textContent='⏺'); }
 // выполнить команду в DOS и вернуть её вывод (редирект в файл + маркер завершения)
 async function runDosCapture(cmd){
   try{ await ci.fsDeleteFile('AIOUT.TXT'); }catch(_){}
@@ -1109,17 +1245,85 @@ async function runDosCapture(cmd){
   return (done? out : (out||'(no output / timed out)')).slice(0,1500);
 }
 function aiLines(answer, kw){ const out=[], re=new RegExp('^\\s*'+kw+':\\s*(.+)$','i'); for(const l of String(answer).split('\n')){ const m=l.match(re); if(m) out.push(m[1].trim()); } return out; }
+// разобрать блоки MAKE: <path> ... ENDMAKE -> [{path, content}]
+function aiMakeFiles(answer){ const out=[], lines=String(answer).split('\n');
+  for(let i=0;i<lines.length;i++){ const m=lines[i].match(/^\s*MAKE:\s*(.+)$/i); if(!m) continue;
+    let path=m[1].trim().replace(/\\/g,'/').replace(/^\/+/,'').replace(/^[cC]:\//,'');
+    const body=[]; let j=i+1; for(; j<lines.length; j++){ if(/^\s*ENDMAKE\s*$/i.test(lines[j])) break; body.push(lines[j]); }
+    if(path) out.push({ path, content: body.join('\r\n').replace(/\s+$/,'')+'\r\n' }); i=j; }
+  return out; }
+// записать файлы из MAKE на диск. Возвращает имена записанных файлов
+async function aiMakeWrite(answer){ const made=[];
+  for(const f of aiMakeFiles(answer)){ try{ await ci.fsWriteFile(f.path, enc(f.content)); made.push(f.path); log('🤖 создан файл: '+f.path+' ('+f.content.length+' Б)'); }
+    catch(e){ log('❌ make '+f.path+': '+e.message,'dd-warn'); } }
+  return made; }
 function logAi(answer){ String(answer).split('\n').forEach(l=>{ if(l.trim()) log('🤖 '+l); }); }   // ответ ассистента — в консоль (лог)
+// долговременная память ассистента: файл AIMEMO.TXT в корне диска (автосейвится в репо -> переживает сессии)
+async function aiMemoRead(){ if(!(cfg.ai&&cfg.ai.memory)||!ci) return ''; try{ const m=await readMarker('AIMEMO.TXT'); return (m&&m.trim())?m.trim():''; }catch(_){ return ''; } }
+async function aiMemoAppend(answer){ if(!(cfg.ai&&cfg.ai.memory)||!ci) return 0;
+  const notes=aiLines(answer,'MEMO'); if(!notes.length) return 0;
+  let cur=''; try{ cur=(await readMarker('AIMEMO.TXT'))||''; }catch(_){}
+  const add=notes.map(n=>'- '+n.replace(/[\r\n]/g,' ').trim()).join('\r\n');
+  const next=cur.replace(/\s+$/,'')+(cur.trim()?'\r\n':'')+add+'\r\n';
+  try{ await ci.fsWriteFile('AIMEMO.TXT', enc(next)); notes.forEach(n=>log('🧠 запомнил: '+n.slice(0,60))); }catch(e){ log('❌ memo: '+e.message,'dd-warn'); }
+  return notes.length; }
+// список AI-макросов в настройках (запуск/удаление)
+function renderMacros(){ const box=$('aiMacroList'); if(!box) return; box.innerHTML='';
+  const macros=(cfg.ai&&Array.isArray(cfg.ai.macros))?cfg.ai.macros:[];
+  if(!macros.length){ box.innerHTML='<div class="dd-hint" style="margin:0">'+t('macroEmpty')+'</div>'; return; }
+  macros.forEach((m,idx)=>{ const row=document.createElement('div');
+    row.style.cssText='display:flex;gap:6px;align-items:center;padding:4px 0;border-bottom:1px solid var(--sh)';
+    const info=document.createElement('div'); info.style.cssText='flex:1;min-width:0';
+    info.innerHTML='<b>'+esc(m.name)+'</b><br><span style="color:var(--mut);font-size:12px">'+esc((m.task||'').slice(0,70))+'</span>';
+    const run=document.createElement('button'); run.className='dd-btn dd-ghost'; run.type='button'; run.textContent='▶ '+t('macroRun');
+    run.onclick=()=>{ if(cmdBusy){ log(lang==='ru'?'Занято':'Busy','dd-warn'); return; }
+      if(!ci){ log(lang==='ru'?'Сначала подключи диск':'Connect a disk first','dd-warn'); return; }
+      closeModal('settingsModal'); cmdBusy=true; runAssistant(m.task).catch(e=>log('Ассистент: '+e.message,'dd-warn')).finally(()=>{ cmdBusy=false; }); };
+    const del=document.createElement('button'); del.className='dd-btn dd-ghost'; del.type='button'; del.textContent='🗑 '+t('macroDel');
+    del.onclick=()=>{ cfg.ai.macros.splice(idx,1); saveCfg(); renderMacros(); };
+    row.appendChild(info); row.appendChild(run); row.appendChild(del); box.appendChild(row); });
+}
+// список задач планировщика в настройках (запуск сейчас / удаление)
+function renderSched(){ const box=$('aiSchedList'); if(!box) return; box.innerHTML='';
+  const list=(cfg.ai&&Array.isArray(cfg.ai.schedule))?cfg.ai.schedule:[];
+  if(!list.length){ box.innerHTML='<div class="dd-hint" style="margin:0">'+t('schedEmpty')+'</div>'; return; }
+  list.forEach((s,idx)=>{ const row=document.createElement('div');
+    row.style.cssText='display:flex;gap:6px;align-items:center;padding:4px 0;border-bottom:1px solid var(--sh)';
+    const when = String(s.trigger)==='start' ? '⏱ '+t('schedStart') : ('🔁 '+(+s.trigger)+(lang==='ru'?' мин':' min'));
+    const info=document.createElement('div'); info.style.cssText='flex:1;min-width:0';
+    info.innerHTML='<b style="font-size:12px">'+esc(when)+'</b><br><span style="color:var(--mut);font-size:12px">'+esc((s.task||'').slice(0,70))+'</span>';
+    const run=document.createElement('button'); run.className='dd-btn dd-ghost'; run.type='button'; run.textContent='▶ '+t('macroRun');
+    run.onclick=()=>{ if(cmdBusy){ log(lang==='ru'?'Занято':'Busy','dd-warn'); return; }
+      if(!ci){ log(lang==='ru'?'Сначала подключи диск':'Connect a disk first','dd-warn'); return; }
+      closeModal('settingsModal'); cmdBusy=true; runAssistant(s.task).catch(e=>log('Ассистент: '+e.message,'dd-warn')).finally(()=>{ cmdBusy=false; }); };
+    const del=document.createElement('button'); del.className='dd-btn dd-ghost'; del.type='button'; del.textContent='🗑 '+t('schedDel');
+    del.onclick=()=>{ cfg.ai.schedule.splice(idx,1); saveCfg(); renderSched(); };
+    row.appendChild(info); row.appendChild(run); row.appendChild(del); box.appendChild(row); });
+}
 // напечатать ответ ассистента построчно в DOS-терминал через ECHO (без ребута; директивы не печатаем)
 async function dosEchoAnswer(answer){
   if(!ci || snapshotRef) return;
   const lines=String(answer).split('\n')
-    .filter(l=> !/^\s*(RUN|INSTALL|UNINSTALL|ASK):/i.test(l))
+    .filter(l=> !/^\s*(RUN|INSTALL|UNINSTALL|ASK|MAKE|MEMO|COMMIT|LOOK):/i.test(l))
     .map(l=> l.replace(/[^\x20-\x7E]/g,'').replace(/[<>|&%^]/g,' ').replace(/\s+$/,''));
   try{ await dosType('ECHO.'); await dosType('ECHO --- Assistant ---'); }catch(_){ return; }
   let n=0;
   for(const l of lines){ if(n++>=16) break;
     try{ if(l.trim()==='') await dosType('ECHO.'); else await dosType('ECHO '+l.slice(0,76)); }catch(_){ break; } }
+}
+// озвучить ответ ассистента (TTS). Директивы не читаем. Ставит флаг aiSpeaking (чтобы wake-микрофон не ловил свой же голос)
+function speakAnswer(answer){
+  if(!(cfg.ai&&cfg.ai.tts)) return;
+  if(typeof window.speechSynthesis==='undefined') return;
+  const text=String(answer).split('\n')
+    .filter(l=> !/^\s*(RUN|INSTALL|UNINSTALL|ASK|MAKE|MEMO|COMMIT|LOOK):/i.test(l))
+    .join('. ').replace(/\s+/g,' ').trim();
+  if(!text) return;
+  try{ window.speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text.slice(0,600)); u.lang='en-US'; u.rate=1.0;
+    aiSpeaking=true; u.onend=()=>{ aiSpeaking=false; }; u.onerror=()=>{ aiSpeaking=false; };
+    window.speechSynthesis.speak(u);
+  }catch(_){ aiSpeaking=false; }
 }
 // прогон ассистента по задаче (из команды AI или из файла): одиночный ответ или агент-цикл
 async function runAssistant(prompt){
@@ -1133,33 +1337,50 @@ async function runAssistant(prompt){
   try{ const progs=await listPrograms(); const inst=new Set(progs.filter(p=>progInstalled(p, files)).map(p=>p.id));
     if(progs.length) ctx='Installable programs (id [installed] : name - desc):\n'+progs.map(p=>'- '+p.id+(inst.has(p.id)?' [installed]':'')+' : '+p.name+(p.desc?(' - '+p.desc):'')).join('\n'); }
   catch(e){ log('❌ GitHub (каталог INSTALL): '+e.message,'dd-warn'); }
+  const memo=await aiMemoRead();   // долговременная память (если включена)
+  if(memo){ ctx='Your memory notes from previous sessions (use them):\n'+memo.slice(0,2000)+(ctx?'\n\n'+ctx:''); }
   const autorun=!!(cfg.ai&&cfg.ai.run);
   const interactive=!!(cfg.ai&&cfg.ai.ask);
+  const vision=!!(cfg.ai&&cfg.ai.vision);
+  const shot0 = vision ? captureScreen() : null;   // снимок экрана для первого запроса
+  if(shot0) log('👁️ экран отправлен ассистенту');
   if(!autorun && !interactive){
     // одиночный ответ-совет (команда — в поле ввода)
-    let answer; try{ answer=await askAssistant(prompt, ctx); }catch(e){ answer='Error: '+e.message; log('❌ Anthropic API: '+e.message,'dd-warn'); }
-    logAi(answer);
+    let answer; try{ answer=await askAssistant(prompt, ctx, shot0); }catch(e){ answer='Error: '+e.message; log('❌ Anthropic API: '+e.message,'dd-warn'); }
+    logAi(answer); await aiMemoAppend(answer);
     const runs=aiLines(answer,'RUN'); if(runs.length && $('cmdInput')) $('cmdInput').value=runs[0];
-    await dosEchoAnswer(answer);
+    await dosEchoAnswer(answer); speakAnswer(answer);
   } else {
     // диалог: ассистент может задавать вопросы (ASK) и/или выполнять команды (RUN)
     const lim=(cfg.ai && +cfg.ai.steps>0) ? +cfg.ai.steps : 99;
-    const messages=[{role:'user', content:(ctx?ctx+'\n\n':'')+'User: '+prompt}];
-    let finalText='', step=0;
+    let firstContent=(ctx?ctx+'\n\n':'')+'User: '+prompt;
+    const blk0=shot0?imageBlock(shot0):null; if(blk0) firstContent=[{type:'text',text:firstContent}, blk0];
+    const messages=[{role:'user', content:firstContent}];
+    let finalText='', step=0, made=[], remounted=false;
     for(step=0; step<lim; step++){
       let answer; try{ answer=await askAssistantMsgs(messages); }catch(e){ finalText='Error: '+e.message; log('❌ Anthropic API: '+e.message,'dd-warn'); break; }
       messages.push({role:'assistant', content:answer}); finalText=answer;
-      logAi(answer);
+      logAi(answer); await aiMemoAppend(answer);
       const asks=aiLines(answer,'ASK'), installs=aiLines(answer,'INSTALL'), uninstalls=aiLines(answer,'UNINSTALL'), runs=aiLines(answer,'RUN');
       // 1) вопросы пользователю (интерактивный режим)
       if(interactive && asks.length){ let qa='';
         for(const q of asks){ let ans=null; try{ ans=window.prompt('🤖 '+q); }catch(_){}
           log('🤖 вопрос: '+q+' → '+(ans==null?'(отмена)':ans)); qa+='Q: '+q+'\nA: '+(ans==null?'(no answer / cancelled)':ans)+'\n'; }
         messages.push({role:'user', content:'Answers:\n'+qa+'\nContinue.'}); continue; }
+      // 1.5) LOOK: вернуть ассистенту свежий снимок экрана
+      if(vision && aiLines(answer,'LOOK').length){ const img=captureScreen(); const blk=img?imageBlock(img):null;
+        log('👁️ снимок экрана для ассистента');
+        messages.push({role:'user', content: blk?[{type:'text',text:'Current DOS screen:'},blk]:'(screen capture failed)'}); continue; }
       // 2) действия с программами (если авто-выполнение)
       if(autorun){
         for(const id of uninstalls){ try{ await doUninstall(id.toLowerCase(), files); }catch(e){ log('❌ uninstall '+id+': '+e.message,'dd-warn'); } }
         for(const id of installs){ try{ const p=(await listPrograms()).find(x=>x.id===id.toLowerCase()); if(p) await doInstall(p); else log('🤖 нет программы: '+id,'dd-warn'); }catch(e){ log('❌ install '+id+': '+e.message,'dd-warn'); } }
+        const madeNow=await aiMakeWrite(answer); made.push(...madeNow);
+        if(madeNow.length){ log('🤖 файлы записаны, перемонтирую (чтобы DOS/компилятор их видел)…'); remounted=true;
+          try{ await remountAndWait('made: '+madeNow.slice(0,3).join(' ').slice(0,36)); }catch(e){ log('❌ remount: '+e.message,'dd-warn'); } }
+        for(const cm of aiLines(answer,'COMMIT')){ if(snapshotRef){ log('💾 коммит недоступен в снимке','dd-warn'); break; }
+          const m=cm.replace(/[\r\n]/g,' ').trim()||'gitdos: AI commit';
+          try{ pushMsg=m; await pushChanges(false); log('💾 коммит: '+m.slice(0,50)); }catch(e){ log('❌ commit: '+e.message,'dd-warn'); } finally{ pushMsg=null; } }
         if(runs.length){ let feedback='';
           for(const c of runs.slice(0,3)){ log('🤖 шаг '+(step+1)+': '+c); const out=await runDosCapture(c); feedback+='$ '+c+'\n'+out+'\n'; }
           messages.push({role:'user', content:'Command output (inspect and continue, or give the final answer with no RUN lines):\n'+feedback}); continue; }
@@ -1167,7 +1388,8 @@ async function runAssistant(prompt){
       break;   // нет вопросов и нечего выполнять -> готово
     }
     if(step>=lim) log('🤖 достигнут лимит шагов ('+lim+')','dd-warn');
-    await dosEchoAnswer(finalText);
+    await dosEchoAnswer(finalText); speakAnswer(finalText);
+    if(made.length && !remounted){ log('🤖 перезагрузка диска: новые файлы ('+made.length+')'); try{ await refreshStatusRemount('made: '+made.slice(0,4).join(' ').slice(0,40)); }catch(e){ log('❌ remount: '+e.message,'dd-warn'); } }
   }
 }
 function programsListText(progs, instSet){
@@ -1477,6 +1699,8 @@ const GITDOS_BAT = [
   'ECHO UPLOADS                      - upload files into the current folder',
   'ECHO AI <question>                - ask the Claude assistant',
   'ECHO AIFILE                       - assistant task from a text file',
+  'ECHO AIMACRO [name]               - list or run a saved assistant macro',
+  'ECHO VOICE [AI]                   - voice input: DOS command (or AI task)',
   'ECHO (token is set in web settings, not here)',
   ':end',
   ''
@@ -1519,6 +1743,10 @@ const UNINSTALL_BAT = ['@ECHO OFF','IF "%1"=="" GOTO u','ECHO [%1] > C:\\GTUNINS
 const AI_BAT = ['@ECHO OFF','IF "%1"=="" GOTO u','ECHO [%1 %2 %3 %4 %5 %6 %7 %8 %9] > C:\\GTAI','ECHO Assistant is thinking... screen will refresh.','GOTO e',':u','ECHO Usage: AI your question  (e.g. AI how to copy a file)','ECHO Or AIFILE - pick a task file in the browser.',':e',''].join('\r\n');
 // AIFILE: открыть окно выбора текстового файла с задачей для ассистента
 const AIFILE_BAT = ['@ECHO OFF','ECHO X > C:\\GTAIF','ECHO Pick a task .txt file in the browser window...',''].join('\r\n');
+// AIMACRO [name]: запустить сохранённый макрос (или без имени - список)
+const AIMACRO_BAT = ['@ECHO OFF','ECHO [%1] > C:\\GTAIM','IF "%1"=="" GOTO l','ECHO Running macro %1...','GOTO e',':l','ECHO Listing saved macros (see browser log/terminal)...',':e',''].join('\r\n');
+// VOICE [AI]: запустить голосовой ввод (по умолч. - команда DOS в поле; VOICE AI - задача ассистенту)
+const VOICE_BAT = ['@ECHO OFF','ECHO [%1] > C:\\GTVOICE','ECHO Voice input requested - look at the browser.','ECHO If the mic does not start, click the mic button once (browser needs a click).',''].join('\r\n');
 function diskListText(){ const g=cfg.github||{}; const L=['  GitDOS - disks','  =============='];
   L.push('  C: '+(g.repo||'-')+' ('+(g.branch||'main')+')'+(g.path?(' /'+g.path):''));
   (cfg.disks||[]).forEach(d=>{ L.push('  '+(d.letter||'?')+': '+(d.repo||'-')+' ('+(d.branch||'main')+')'+(d.token?' [token]':'')+'  -> C:\\DISKS\\'+(d.letter||'?')); });
@@ -1571,7 +1799,7 @@ function showText(c){ const cm=(c&&c.commit)||{}; const L=['  GitDOS - commit '+
 // служебные файлы DOS-утилиты (никогда не синкаются в репозиторий)
 const BRIDGE_FILES = new Set(['GITDOS.NFO','GITDOS.DAT','GITDOS.BAT','GTDISKS.TXT','GTPROFS.TXT',
   'GTSAVE','GTNOW','GTSET','GTPULL','GTLOG','GTPROF','GTDIFF','GTCOMMIT','GTAUTO','GTBRANCH','GTBRS','GTWHO','GTHIST','GTFILES',
-  'GTCO','GTREST','GTTAG','GTNEW','GTSHOW','GTMERGE','GTDELBR','GTRESET','VER.BAT','VER.DAT','UPLOADS.BAT','INSTALL.BAT','GTINST','UNINSTALL.BAT','GTUNINST','AI.BAT','GTAI','AIOUT.TXT','AIDONE','AIFILE.BAT','GTAIF']);
+  'GTCO','GTREST','GTTAG','GTNEW','GTSHOW','GTMERGE','GTDELBR','GTRESET','VER.BAT','VER.DAT','UPLOADS.BAT','INSTALL.BAT','GTINST','UNINSTALL.BAT','GTUNINST','AI.BAT','GTAI','AIOUT.TXT','AIDONE','AIFILE.BAT','GTAIF','AIMACRO.BAT','GTAIM','VOICE.BAT','GTVOICE']);
 // маркер GTUP может лежать в ЛЮБОЙ папке (текущей в DOS) — исключаем его по базовому имени
 function isBridge(name){ return BRIDGE_FILES.has(name) || name.startsWith('COMMANDS/') || name.substring(name.lastIndexOf('/')+1)==='GTUP'; }
 let pushMsg=null;       // своё сообщение коммита (GITDOS COMMIT <msg>)
@@ -1681,9 +1909,26 @@ function startAutoSync(){ stopAutoSync(); lastBundleCrc=null; lastNamesSig=null;
 function stopAutoSync(){ if(autoTimer){ clearInterval(autoTimer); autoTimer=null; } }
 
 // ---------- мост DOS-утилиты GITDOS: следим за файлами-маркерами, выполняем команды ----------
-let cmdTimer=null, cmdBusy=false;
+let cmdTimer=null, cmdBusy=false, voiceFromDos=false, aiSpeaking=false;   // voiceFromDos: голос из VOICE; aiSpeaking: идёт TTS-озвучка ответа
 function startCmdWatch(){ stopCmdWatch(); cmdTimer=setInterval(cmdTick, 2000); }
 function stopCmdWatch(){ if(cmdTimer){ clearInterval(cmdTimer); cmdTimer=null; } }
+// ---- планировщик AI-задач: триггер 'start' (при готовности диска) или интервал в минутах ----
+let schedTimer=null, schedLast={};
+function aiSchedule(){ const a=cfg.ai||{}; return Array.isArray(a.schedule)?a.schedule:[]; }
+function startScheduler(){ stopScheduler(); schedTimer=setInterval(schedTick, 30000); }
+function stopScheduler(){ if(schedTimer){ clearInterval(schedTimer); schedTimer=null; } }
+async function runScheduledTask(s, tag){ if(!ci||snapshotRef||cmdBusy||aiSpeaking) return false;
+  if(!(cfg.ai&&cfg.ai.key)){ return false; }
+  log('⏰ '+tag+': «'+String(s.task||'').slice(0,46)+'»'); cmdBusy=true;
+  try{ await runAssistant(s.task); }catch(e){ log('⏰ '+e.message,'dd-warn'); } finally{ cmdBusy=false; }
+  return true; }
+async function runScheduledStart(){ if(!ci||snapshotRef) return;
+  for(const s of aiSchedule()){ if(String(s.trigger)!=='start') continue; await runScheduledTask(s,'старт-задача'); } }
+async function schedTick(){ if(!ci||snapshotRef||cmdBusy||aiSpeaking) return;
+  const now=Date.now();
+  for(const s of aiSchedule()){ const iv=+s.trigger; if(!(iv>0)) continue;
+    const last=schedLast[s.id]||0; if(now-last < iv*60000) continue;
+    schedLast[s.id]=now; if(await runScheduledTask(s,'по расписанию ('+iv+' мин)')) break; } }   // одну задачу за тик
 async function cmdTick(){ if(cmdBusy||syncing||!ci) return; cmdBusy=true;
   try{ const files=await fsList();
     // UPLOADS: маркер GTUP в любой папке -> открыть окно загрузки в эту папку
@@ -1806,6 +2051,28 @@ async function cmdTick(){ if(cmdBusy||syncing||!ci) return; cmdBusy=true;
       log('🤖 DOS-команда: задача из файла…'); openModal('aiFileModal');
       try{ $('aiFileInput').click(); }catch(_){}   // best-effort: системный диалог (если есть «живой» жест)
     }
+    else if(files.has('GTAIM')){
+      const content=await readMarker('GTAIM'); try{ await ci.fsDeleteFile('GTAIM'); }catch(_){}
+      const name=((String(content).match(/\[(.*)\]/)||[])[1]||'').replace(/[\r\n]/g,' ').trim();
+      const macros=(cfg.ai&&Array.isArray(cfg.ai.macros))?cfg.ai.macros:[];
+      if(!name){   // список макросов
+        log('🎯 Макросы ('+macros.length+'):'); macros.forEach(m=>log('   • '+m.name+' — '+(m.task||'').slice(0,60)));
+        await dosNote('macros: '+(macros.length? macros.map(m=>m.name).join(', ').slice(0,60) : 'none (add in settings)'));
+      } else {
+        const m=macros.find(x=>x.name.toLowerCase()===name.toLowerCase());
+        if(!m){ log('🎯 нет макроса: '+name,'dd-warn'); await dosNote('macro not found: '+name); }
+        else { log('🎯 макрос «'+m.name+'»'); await runAssistant(m.task); }
+      }
+    }
+    else if(files.has('GTVOICE')){
+      const content=await readMarker('GTVOICE'); try{ await ci.fsDeleteFile('GTVOICE'); }catch(_){}
+      const arg=((String(content).match(/\[(.*)\]/)||[])[1]||'').replace(/[\r\n]/g,' ').trim().toUpperCase();
+      const btn=(arg==='AI')?$('voiceBtn'):$('voiceCmdBtn');   // best-effort: программный клик (микрофон может потребовать живой клик)
+      log('🎙️ DOS-команда: голосовой ввод'+(arg==='AI'?' (ассистент)':' (команда)'));
+      await dosNote('voice: speak now (if mic did not start, click the mic button)');
+      voiceFromDos=true;   // результат печатать в сам терминал
+      if(btn) try{ btn.click(); }catch(_){ voiceFromDos=false; }
+    }
     else if(files.has('GTCO')){ const sha=(await readMarker('GTCO')).replace(/[\r\n]/g,'').trim();
       try{ await ci.fsDeleteFile('GTCO'); }catch(_){}
       if(sha){ log('🖥️ DOS-команда: снимок коммита '+sha.slice(0,7)); await mount({ref:sha, label:sha.slice(0,7)}); }
@@ -1883,6 +2150,14 @@ async function writeDatRemount(text){
     await boot(URL.createObjectURL(new Blob([full],{type:'application/zip'})));
   }catch(e){ log('Обновление экрана GITDOS: '+e.message,'dd-warn'); } }
 async function refreshStatusRemount(note){ const cnt=(await fsList()).size; await writeDatRemount(statusLines(cnt, note)); }
+// перемонтирование с ожиданием готовности диска (для агента: записанный MAKE-файл должен стать видим DOS до RUN)
+let ciReadyWaiters=[];
+function drainCiReady(){ const w=ciReadyWaiters; ciReadyWaiters=[]; w.forEach(fn=>{ try{ fn(); }catch(_){} }); }
+function remountAndWait(note){ return new Promise(resolve=>{
+    let done=false; const fin=()=>{ if(!done){ done=true; resolve(); } };
+    ciReadyWaiters.push(fin); setTimeout(fin, 9000);                 // страховка от зависания, если ci-ready не придёт
+    refreshStatusRemount(note).catch(()=>fin());
+  }).then(()=> sleep(1000)); }                                       // дать DOS дойти до приглашения
 
 // ---------- DOSBox ----------
 let dosProps=null, ci=null;
@@ -1909,16 +2184,24 @@ function makeConf(m){ const cy=safeCycles(m&&m.cycles);
     '@mount c .\n@c:\n@CLS\n@TYPE GITDOS.NFO\n@TYPE GITDOS.DAT\n@CALL AUTOEXEC.BAT\n@IF EXIST C:\\COMMANDS\\SETPATH.BAT CALL C:\\COMMANDS\\SETPATH.BAT\n';
   if(m && m.run) s+=dosRunLines(m.run);
   return s; }
+// сетевая (IPX) конфигурация для мультиплеера — opt-in
+function netConf(){ const n=cfg.net||{}; return { on:!!n.on, room:String(n.room||'').trim(), backend:String(n.backend||'wss://netherlands.dos.zone').trim() }; }
 async function boot(bundleUrl){ log('Запускаю DOSBox…');
   if(dosProps&&dosProps.stop){ try{ await dosProps.stop(); }catch(_){} } $('dos').innerHTML=''; ci=null;
-  dosProps=Dos($('dos'), { url:bundleUrl, pathPrefix:'vendor/js-dos/emulators/',
+  const opts={ url:bundleUrl, pathPrefix:'vendor/js-dos/emulators/',
     autoStart:true, kiosk:true, noCloud:true, // без стартового окна и без бокового UI самого js-dos
     onEvent:(ev,arg)=>{
       if(ev==='ci-ready'){ ci=arg; log('Диск C: примонтирован.');
-        loadPending().then(()=>{ startAutoSync(); startCmdWatch(); runPendingCmds(); }).catch(e=>{ log('Догрузка: '+e.message,'dd-warn'); startAutoSync(); startCmdWatch(); runPendingCmds(); }); }
+        loadPending().then(()=>{ startAutoSync(); startCmdWatch(); startScheduler(); drainCiReady(); runPendingCmds().then(()=>runScheduledStart()); }).catch(e=>{ log('Догрузка: '+e.message,'dd-warn'); startAutoSync(); startCmdWatch(); startScheduler(); drainCiReady(); runPendingCmds().then(()=>runScheduledStart()); }); }
       if(ev==='emu-ready'){ log('Эмулятор готов.'); applyMute(); }
+      if(ev==='ws-connected'){ log('🌐 Сеть IPX подключена'); }
+      if(ev==='ws-disconnected'){ log('🌐 Сеть IPX отключена','dd-warn'); }
       if(ev==='emu-error'){ try{ console.error('emu-error', arg); }catch(_){}
-        log('DOSBox ошибка: '+(typeof ddDescribe==='function'?ddDescribe(arg):String(arg)),'dd-warn'); } } });
+        log('DOSBox ошибка: '+(typeof ddDescribe==='function'?ddDescribe(arg):String(arg)),'dd-warn'); } } };
+  const nc=netConf();   // включаем IPX только если пользователь сам задал комнату и включил сеть
+  if(nc.on && nc.room){ opts.ipx=1; opts.ipxBackend=nc.backend; opts.room=nc.room;
+    log('🌐 Сетевая игра: комната «'+nc.room+'» @ '+nc.backend); }
+  dosProps=Dos($('dos'), opts);
   $('stopBtn').disabled=false; }
 
 // проверка диска C:: AUTOEXEC.BAT и CONFIG.SYS — нет -> создать по шаблону (в папке диска + в репо)
@@ -2008,6 +2291,8 @@ async function mount(opts){ opts=opts||{}; const ref=opts.ref||null;
     pendingLoad.push({path:'COMMANDS/UNINSTALL.BAT', data:enc(UNINSTALL_BAT)});
     pendingLoad.push({path:'COMMANDS/AI.BAT', data:enc(AI_BAT)});
     pendingLoad.push({path:'COMMANDS/AIFILE.BAT', data:enc(AIFILE_BAT)});
+    pendingLoad.push({path:'COMMANDS/AIMACRO.BAT', data:enc(AIMACRO_BAT)});
+    pendingLoad.push({path:'COMMANDS/VOICE.BAT', data:enc(VOICE_BAT)});
     bundleFiles.push({path:'.jsdos/dosbox.conf', data:enc(makeConf(confM))});
     log('Собираю образ диска…'); await boot(URL.createObjectURL(new Blob([buildZip(bundleFiles)],{type:'application/zip'})));
   }catch(e){ log('Ошибка: '+e.message,'dd-warn'); }
@@ -2435,7 +2720,7 @@ function init(){
   $('createBtn').onclick=async()=>{ $('createBtn').disabled=true; try{ await createRepo(); }catch(e){ log('Ошибка: '+e.message,'dd-warn'); } finally{ $('createBtn').disabled=false; } };
   $('mountBtn').onclick=mount;
   $('mountBtn2').onclick=mount;
-  $('stopBtn').onclick=async()=>{ stopAutoSync(); stopCmdWatch();
+  $('stopBtn').onclick=async()=>{ stopAutoSync(); stopCmdWatch(); stopScheduler(); recStop();
     if(ci && drives.length && !snapshotRef){ try{ await pushChanges(false); }catch(_){} } // финальное сохранение (не для снимка)
     if(dosProps&&dosProps.stop){ try{ await dosProps.stop(); }catch(_){} } ci=null; snapshotRef=null;
     $('stopBtn').disabled=true; log('Остановлено.'); };
@@ -2450,7 +2735,44 @@ function init(){
     $('aiModel').addEventListener('input',()=>{ (cfg.ai=cfg.ai||{}).model=$('aiModel').value.trim(); saveCfg(); });
     if($('aiRun')){ $('aiRun').checked=!!cfg.ai.run; $('aiRun').addEventListener('change',()=>{ (cfg.ai=cfg.ai||{}).run=$('aiRun').checked; saveCfg(); }); }
     if($('aiSteps')){ $('aiSteps').value=(cfg.ai.steps!=null?cfg.ai.steps:''); $('aiSteps').addEventListener('input',()=>{ const v=parseInt($('aiSteps').value,10); (cfg.ai=cfg.ai||{}).steps=isNaN(v)?null:Math.max(0,Math.min(99,v)); saveCfg(); }); }
-    if($('aiAsk')){ $('aiAsk').checked=!!cfg.ai.ask; $('aiAsk').addEventListener('change',()=>{ (cfg.ai=cfg.ai||{}).ask=$('aiAsk').checked; saveCfg(); }); } }
+    if($('aiAsk')){ $('aiAsk').checked=!!cfg.ai.ask; $('aiAsk').addEventListener('change',()=>{ (cfg.ai=cfg.ai||{}).ask=$('aiAsk').checked; saveCfg(); }); }
+    if($('aiTts')){ $('aiTts').checked=!!cfg.ai.tts; $('aiTts').addEventListener('change',()=>{ (cfg.ai=cfg.ai||{}).tts=$('aiTts').checked; saveCfg(); if($('aiTts').checked && typeof window.speechSynthesis!=='undefined'){ try{ window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance('GitDOS voice on')); }catch(_){}} }); }
+    if($('aiMacroList')){ renderMacros();
+      $('aiMacroAdd').onclick=()=>{ const name=($('aiMacroName').value||'').trim().replace(/\s+/g,'-').replace(/[^A-Za-z0-9_-]/g,'');
+        const task=($('aiMacroTask').value||'').trim();
+        if(!name){ log(lang==='ru'?'Имя макроса: одно слово (англ./цифры)':'Macro name: one word (latin/digits)','dd-warn'); return; }
+        if(!task){ log(lang==='ru'?'Пустая задача макроса':'Empty macro task','dd-warn'); return; }
+        cfg.ai=cfg.ai||{}; cfg.ai.macros=Array.isArray(cfg.ai.macros)?cfg.ai.macros:[];
+        const i=cfg.ai.macros.findIndex(m=>m.name.toLowerCase()===name.toLowerCase());
+        if(i>=0) cfg.ai.macros[i]={name,task}; else cfg.ai.macros.push({name,task});
+        saveCfg(); $('aiMacroName').value=''; $('aiMacroTask').value=''; renderMacros();
+        log('🎯 '+(lang==='ru'?'Макрос сохранён: ':'Macro saved: ')+name); }; }
+    if($('aiWakeCmd')){ $('aiWakeCmd').value=cfg.ai.wakeCmd||''; $('aiWakeCmd').addEventListener('input',()=>{ (cfg.ai=cfg.ai||{}).wakeCmd=$('aiWakeCmd').value.trim(); saveCfg(); }); }
+    if($('aiWakeAi')){ $('aiWakeAi').value=cfg.ai.wakeAi||''; $('aiWakeAi').addEventListener('input',()=>{ (cfg.ai=cfg.ai||{}).wakeAi=$('aiWakeAi').value.trim(); saveCfg(); }); }
+    // память
+    if($('aiMemory')){ $('aiMemory').checked=!!cfg.ai.memory; $('aiMemory').addEventListener('change',()=>{ (cfg.ai=cfg.ai||{}).memory=$('aiMemory').checked; saveCfg(); }); }
+    if($('aiVision')){ $('aiVision').checked=!!cfg.ai.vision; $('aiVision').addEventListener('change',()=>{ (cfg.ai=cfg.ai||{}).vision=$('aiVision').checked; saveCfg(); }); }
+    if($('aiMemView')) $('aiMemView').onclick=async()=>{ if(!ci){ log(lang==='ru'?'Подключи диск, чтобы читать память':'Connect a disk to read memory','dd-warn'); return; }
+      const m=await aiMemoRead(); if(!m){ log(lang==='ru'?'🧠 Память пуста':'🧠 Memory is empty'); return; }
+      log('🧠 '+(lang==='ru'?'Память ассистента:':'Assistant memory:')); m.split('\n').forEach(l=>{ if(l.trim()) log('   '+l); });
+      if(confirm(lang==='ru'?'Очистить память ассистента (AIMEMO.TXT)?':'Clear assistant memory (AIMEMO.TXT)?')){
+        try{ await ci.fsWriteFile('AIMEMO.TXT', enc('')); log('🧠 '+(lang==='ru'?'Память очищена':'Memory cleared')); }catch(e){ log('memo: '+e.message,'dd-warn'); } } };
+    // планировщик
+    if($('aiSchedList')){ renderSched();
+      if($('aiSchedTrig')) $('aiSchedTrig').onchange=()=>{ $('aiSchedMin').disabled = ($('aiSchedTrig').value!=='interval'); };
+      $('aiSchedAdd').onclick=()=>{ const task=($('aiSchedTask').value||'').trim();
+        if(!task){ log(lang==='ru'?'Пустая задача':'Empty task','dd-warn'); return; }
+        let trigger='start'; if($('aiSchedTrig').value==='interval'){ const mn=parseInt($('aiSchedMin').value,10); if(!(mn>0)){ log(lang==='ru'?'Укажи интервал в минутах':'Enter interval in minutes','dd-warn'); return; } trigger=Math.max(1,Math.min(1440,mn)); }
+        cfg.ai=cfg.ai||{}; cfg.ai.schedule=Array.isArray(cfg.ai.schedule)?cfg.ai.schedule:[];
+        cfg.ai.schedule.push({ id:'s'+Date.now()+Math.floor(Math.random()*1000), task, trigger });
+        saveCfg(); $('aiSchedTask').value=''; $('aiSchedMin').value=''; renderSched();
+        log('⏰ '+(lang==='ru'?'Задача добавлена':'Task added')); }; } }
+  // сетевая игра (IPX)
+  if($('netOn')){ cfg.net=cfg.net||{};
+    $('netOn').checked=!!cfg.net.on; $('netRoom').value=cfg.net.room||''; $('netBackend').value=cfg.net.backend||'';
+    $('netOn').addEventListener('change',()=>{ (cfg.net=cfg.net||{}).on=$('netOn').checked; saveCfg(); if($('netOn').checked) log(lang==='ru'?'🌐 Сеть IPX включена — перезапусти диск (Стоп → Пуск)':'🌐 IPX network on — restart disk (Stop → Start)'); });
+    $('netRoom').addEventListener('input',()=>{ (cfg.net=cfg.net||{}).room=$('netRoom').value.trim(); saveCfg(); });
+    $('netBackend').addEventListener('input',()=>{ (cfg.net=cfg.net||{}).backend=$('netBackend').value.trim(); saveCfg(); }); }
   $('mountSelLoad').onclick=mountSelLoad;
   $('launchLoad').onclick=launchLoad;
   $('shareCopy').onclick=shareCopy;
@@ -2486,6 +2808,84 @@ function init(){
   $('cmdInput').addEventListener('focus',function(){ this.removeAttribute('readonly'); });
   $('cmdInput').addEventListener('blur',function(){ this.setAttribute('readonly',''); });
   $('cmdInput').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); runDosCommand($('cmdInput').value); } });
+  // ---- голосовой ввод (Web Speech API): общий хелпер для обоих микрофонов ----
+  let recog=null, recogBtn=null;
+  function stopVoice(){ if(recog){ try{ recog.stop(); }catch(_){} } if(recogBtn&&$(recogBtn)) $(recogBtn).classList.remove('dd-on'); recog=null; recogBtn=null; }
+  function startVoice(btnId, recLang, onText){
+    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(!SR){ log(lang==='ru'?'Голосовой ввод не поддерживается этим браузером (нужен Chrome/Edge)':'Voice input not supported by this browser','dd-warn'); return; }
+    if(recog){ const same=(recogBtn===btnId); stopVoice(); if(same) return; }   // повторный клик той же кнопки — отмена
+    if(!ci){ log(lang==='ru'?'Сначала подключи диск':'Connect a disk first','dd-warn'); return; }
+    if(wakeRecog){ try{ wakeRecog.onend=null; wakeRecog.stop(); }catch(_){} wakeRecog=null; }   // пауза wake на время ручного захвата
+    recog=new SR(); recogBtn=btnId; recog.lang=recLang; recog.interimResults=false; recog.maxAlternatives=1;
+    log('🎙️ '+(lang==='ru'?'Слушаю… (нажми ещё раз для отмены)':'Listening… (click again to cancel)')); if($(btnId)) $(btnId).classList.add('dd-on');
+    recog.onresult=(e)=>{ const text=(e.results[0][0].transcript||'').trim(); if(text) try{ onText(text); }catch(err){ log('🎙️ '+err.message,'dd-warn'); } };
+    recog.onerror=(e)=>log('🎙️ '+(lang==='ru'?'ошибка: ':'error: ')+(e.error||''),'dd-warn');
+    recog.onend=()=>{ if(recogBtn===btnId){ if($(btnId)) $(btnId).classList.remove('dd-on'); recog=null; recogBtn=null; voiceFromDos=false; if(wakeWanted) setTimeout(wakeLoop, 600); } };
+    try{ recog.start(); }catch(_){ stopVoice(); }
+  }
+  // транслитерация кириллицы в латиницу (распознаватель по-русски выдаёт кир.: «дир» -> DIR)
+  const CYR2LAT={'а':'a','б':'b','в':'v','г':'g','д':'d','е':'e','ё':'e','ж':'zh','з':'z','и':'i','й':'y','к':'k','л':'l','м':'m','н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f','х':'h','ц':'c','ч':'ch','ш':'sh','щ':'sch','ъ':'','ы':'y','ь':'','э':'e','ю':'yu','я':'ya'};
+  function translit(s){ return String(s).replace(/[а-яё]/gi, ch=>CYR2LAT[ch.toLowerCase()]||''); }
+  // распознанную речь -> DOS-команда (слова-символы рус/англ, транслит кир->лат, верхний регистр)
+  function voiceToCmd(s){ let c=String(s).trim();
+    c=c.replace(/обратн[а-яё]*\s*слэш|back ?slash/gi,'\\').replace(/слэш|slash/gi,'/')
+       .replace(/звёздочк[а-яё]*|звездочк[а-яё]*|asterisk|star/gi,'*').replace(/двоеточи[а-яё]*|colon/gi,':').replace(/точк[а-яё]*|dot/gi,'.');
+    c=translit(c).toUpperCase().replace(/[!?;]+$/,'');
+    c=c.replace(/\s*\\\s*/g,'\\').replace(/\s*\/\s*/g,'/').replace(/\s*\.\s*/g,'.');   // убрать пробелы вокруг символов
+    return c.trim(); }
+  // ---- wake-word: постоянное прослушивание триггерной фразы (отдельный непрерывный распознаватель) ----
+  let wakeRecog=null, wakeWanted=false, wakeErrs=0;
+  // фразы-триггеры: список синонимов через запятую (латиница+кириллица, т.к. распознаватель выдаёт по-разному)
+  function wakePhrases(){ const a=cfg.ai||{};
+    const split=(s,def)=> String(s||def).toLowerCase().split(',').map(x=>x.trim()).filter(Boolean);
+    return { cmd:split(a.wakeCmd,'git,гит'), ai:split(a.wakeAi,'макс,max') }; }
+  function matchPhrase(low, arr){ for(const ph of arr){ if(ph && low.startsWith(ph)) return ph; } return null; }
+  function setWakeBtn(on){ const b=$('wakeBtn'); if(b) b.classList.toggle('dd-on', !!on); }
+  function stopWake(){ wakeWanted=false; if(wakeRecog){ try{ wakeRecog.onend=null; wakeRecog.stop(); }catch(_){} wakeRecog=null; } setWakeBtn(false); log('🎧 '+(lang==='ru'?'Прослушивание выключено':'Listening off')); }
+  function wakeLoop(){ if(!wakeWanted) return;
+    const SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR){ stopWake(); return; }
+    if(recog){ return; }   // идёт ручной захват — wakeLoop перезапустится из его onend
+    wakeRecog=new SR(); wakeRecog.lang=(lang==='ru'?'ru-RU':'en-US'); wakeRecog.continuous=true; wakeRecog.interimResults=false; wakeRecog.maxAlternatives=1;
+    wakeRecog.onresult=(e)=>{ for(let i=e.resultIndex;i<e.results.length;i++){ if(e.results[i].isFinal) handleWake((e.results[i][0].transcript||'').trim()); } };
+    wakeRecog.onerror=(e)=>{ const err=e.error||''; if(err==='no-speech'||err==='aborted') return; wakeErrs++;
+      log('🎧 '+(lang==='ru'?'ошибка: ':'error: ')+err,'dd-warn');
+      if(err==='not-allowed'||err==='service-not-allowed'||wakeErrs>=6) stopWake(); };
+    wakeRecog.onend=()=>{ wakeRecog=null; if(wakeWanted && !recog) setTimeout(wakeLoop, 500); };
+    try{ wakeRecog.start(); }catch(_){ wakeRecog=null; if(wakeWanted) setTimeout(wakeLoop, 800); }
+  }
+  function startWake(){ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(!SR){ log(lang==='ru'?'Голосовой ввод не поддерживается этим браузером (нужен Chrome/Edge)':'Voice input not supported by this browser','dd-warn'); return; }
+    if(!ci){ log(lang==='ru'?'Сначала подключи диск':'Connect a disk first','dd-warn'); return; }
+    const p=wakePhrases(); wakeWanted=true; wakeErrs=0; setWakeBtn(true);
+    log('🎧 '+(lang==='ru'?'Слушаю триггер: ':'Listening for: ')+'«'+p.cmd[0]+' …» (команда) / «'+p.ai[0]+' …» (ассистент)'+(navigator.onLine===false?(lang==='ru'?' (нет интернета!)':' (offline!)'):'')); wakeLoop(); }
+  function handleWake(text){ if(!text||cmdBusy||aiSpeaking) return; const low=text.toLowerCase(), p=wakePhrases();
+    let rest=null, mode=null;
+    const aiPh=matchPhrase(low, p.ai), cmdPh=aiPh?null:matchPhrase(low, p.cmd);
+    if(aiPh){ mode='ai'; rest=text.slice(aiPh.length); }
+    else if(cmdPh){ mode='cmd'; rest=text.slice(cmdPh.length); }
+    else return;   // фраза не адресована нам — игнор
+    rest=String(rest).replace(/^[\s,.:;-]+/,'').trim(); log('🎧 «'+text+'»');
+    if(mode==='ai'){ if(!rest) return; if(!(cfg.ai&&cfg.ai.key)){ log(lang==='ru'?'Нет API-ключа ассистента':'No assistant API key','dd-warn'); return; }
+      cmdBusy=true; (async()=>{ try{ await dosNote('You said: '+rest); await runAssistant(rest); }catch(e){ log('Ассистент: '+e.message,'dd-warn'); } finally{ cmdBusy=false; } })(); }
+    else { const cmd=voiceToCmd(rest); if(cmd){ log('🎧 → '+cmd); runDosCommand(cmd); } } }
+  if($('wakeBtn')) $('wakeBtn').onclick=()=>{ if(wakeWanted) stopWake(); else startWake(); };
+  // 🎤 — задача ассистенту (язык интерфейса; ассистент понимает и русский)
+  if($('voiceBtn')) $('voiceBtn').onclick=()=>{
+    if(!(cfg.ai&&cfg.ai.key)){ log(lang==='ru'?'Укажи API-ключ ассистента в «Общие настройки»':'Set assistant API key in settings','dd-warn'); openModal&&openModal('settingsModal'); return; }
+    startVoice('voiceBtn', (lang==='ru'?'ru-RU':'en-US'), text=>{ log('🎤 «'+text+'»');
+      if(cmdBusy){ log(lang==='ru'?'Занято: идёт другая операция':'Busy','dd-warn'); return; }
+      const fromDos=voiceFromDos;   // ответ ассистента и так печатается в терминал; при вызове из DOS покажем и вопрос
+      cmdBusy=true;
+      (async()=>{ try{ if(fromDos) await dosNote('You said: '+text); await runAssistant(text); }
+        catch(e){ log('Ассистент: '+e.message,'dd-warn'); } finally{ cmdBusy=false; } })(); });
+  };
+  // 🎙️ — команда DOS. Из веб-кнопки: кладём в поле (жми Enter). Из DOS-команды VOICE: печатаем и выполняем в самом терминале.
+  if($('voiceCmdBtn')) $('voiceCmdBtn').onclick=()=> startVoice('voiceCmdBtn', 'en-US', text=>{
+    const cmd=voiceToCmd(text); log('🎙️ «'+text+'» → '+cmd);
+    if(voiceFromDos){ runDosCommand(cmd); }   // печать команды в терминал + выполнение -> результат в самой консоли
+    else { const inp=$('cmdInput'); if(inp){ inp.removeAttribute('readonly'); inp.value=cmd; inp.focus(); } } });
+  if($('recBtn')) $('recBtn').onclick=recToggle;
   $('resetBtn').onclick=()=>{
     if(!confirm(t('resetConfirm'))) return;
     try{ localStorage.clear(); }catch(_){}
