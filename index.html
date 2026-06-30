@@ -224,7 +224,7 @@
 
 <div class="dd-win">
   <div class="dd-topbar"><span class="ico">🐙</span><h1>GitDOS</h1>
-    <span class="dd-ver"><span data-i18n="tagline">Твой DOS живёт в репозитории</span> · сборка 157</span>
+    <span class="dd-ver"><span data-i18n="tagline">Твой DOS живёт в репозитории</span> · сборка 158</span>
     <span id="apiLimit" class="dd-apilimit" title=""></span>
     <span style="margin-left:8px;display:flex;gap:4px">
       <button id="langRu" class="dd-btn" type="button" style="min-height:0;padding:1px 8px">RU</button>
@@ -769,7 +769,7 @@
         <p><b>🎯 Макросы (<code>AIMACRO</code>).</b> Сохранённые задачи-заготовки. В «🤖 Ассистент» задаёшь <b>имя</b> (одно слово) и <b>текст задачи</b> — он сохраняется в браузере (localStorage). В DOS: <code>AIMACRO</code> — список макросов, <code>AIMACRO имя</code> — запустить макрос (его текст уходит ассистенту как задача). Запустить можно и кнопкой <b>▶</b> прямо в настройках. Удобно для частых задач (бэкап, генерация отчёта, уборка временных файлов и т.п.).</p>
 
         <h3>🏪 GitDOS Store (витрина каталога)</h3>
-        <p>Пункт меню «🏪 GitDOS Store» — визуальная витрина того же каталога, что и команда <code>INSTALL</code>. Навигация в глубину: сверху — разделы (🎮 Игры / 💿 Программы / 🖴 Драйверы), нажимаешь раздел → появляется <b>список подразделов</b> (архиваторы, файловые менеджеры, браузеры… с числом программ), нажимаешь подраздел → открывается <b>список программ</b> с версией, размером, описанием (кнопка «← Разделы» — назад). Если в разделе нет подразделов, программы показываются сразу. Кнопка <b>«Установить»</b> на карточке закрывает окно и <b>выполняет в DOS-терминале команду <code>INSTALL &lt;id&gt;</code></b> — то есть установка идёт штатным путём пакетного менеджера. Уже установленные помечены «✓ Установлено». Каталог тот же и настраивается там же («🧩 Каталог программ»); двухуровневая раскладка — это путь <code>&lt;раздел&gt;/&lt;подраздел&gt;/&lt;id&gt;/install.json</code> в репозитории. Вверху окна — <b>🔎 поиск</b> по всем программам (имя/id/описание/раздел).</p>
+        <p>Пункт меню «🏪 GitDOS Store» — визуальная витрина того же каталога, что и команда <code>INSTALL</code>. Навигация в глубину: сверху — <b>три фиксированных раздела всегда</b> (💿 Программы / 🎮 Игры / 🖴 Драйверы; определяются по верхнему сегменту пути — <code>games/</code>, <code>drivers/</code>, остальное → Программы), нажимаешь раздел → появляется <b>список подразделов</b> (архиваторы, файловые менеджеры, браузеры… с числом программ), нажимаешь подраздел → открывается <b>список программ</b> с версией, размером, описанием (кнопка «← Разделы» — назад). Если в разделе нет подразделов, программы показываются сразу. Кнопка <b>«Установить»</b> на карточке закрывает окно и <b>выполняет в DOS-терминале команду <code>INSTALL &lt;id&gt;</code></b> — установка идёт <b>только</b> штатным путём пакетного менеджера (никакой отдельной установки из веба нет). <code>INSTALL</code> находит программу по <code>id</code> независимо от вложенности раздела/подраздела, так что ставит из любого из трёх разделов. Уже установленные помечены «✓ Установлено». Каталог тот же и настраивается там же («🧩 Каталог программ»); двухуровневая раскладка — это путь <code>&lt;раздел&gt;/&lt;подраздел&gt;/&lt;id&gt;/install.json</code> в репозитории. Вверху окна — <b>🔎 поиск</b> по всем программам (имя/id/описание/раздел).</p>
         <p><b>📤 Публикация программ.</b> Кнопка «📤 Опубликовать» в Store — выложить <b>свою</b> программу в каталог (твой репозиторий) прямо из браузера через GitHub API. Укажи раздел (Программы/Игры/Драйверы), подраздел (напр. archivers), id, название, версию, описание, чем запускать, и выбери файлы программы. GitDOS соберёт манифест <code>install.json</code> и запишет его вместе с файлами по пути <code>&lt;раздел&gt;/&lt;подраздел&gt;/&lt;id&gt;/</code>. Нужен <b>«Токен каталога»</b> с правом записи в этот репозиторий — задаётся в «🧩 Каталог программ» (хранится только в браузере, в код/коммиты не попадает). После публикации программа сразу появляется в Store и доступна команде <code>INSTALL</code>. ⚠️ Публикуй только в доверенный каталог: манифест может прописывать строки в AUTOEXEC/CONFIG у того, кто ставит программу.</p>
         <p><b>↪ Перемещение между разделами.</b> Если задан «Токен каталога», на карточке программы появляется кнопка <b>↪</b> — переместить программу в другой раздел/подраздел своего каталога. Выбери раздел (Программы/Игры/Драйверы) и подраздел, нажми «Переместить» — GitDOS перенесёт папку программы (все файлы + <code>install.json</code>) на новый путь через GitHub API (запись по новому пути и удаление по старому) и обновит витрину. Видно только для своего каталога (где есть право записи).</p>
         <h3>Команда INSTALL (пакетный менеджер программ)</h3>
@@ -1397,6 +1397,12 @@ let storePrograms=null, storeInstalled=new Set(), storeTab=null, storeSub=null, 
 const STORE_GRID='display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px';
 function storeTopOf(p){ return (String(p.catPath||p.cat||'misc').split('/')[0]||'misc').toLowerCase(); }
 function storeSubOf(p){ return String(p.catPath||p.cat||'').split('/').slice(1).join('/'); }
+// фиксированные разделы Store: programs / games / drivers (всё неигровое/недрайверное -> programs)
+const STORE_SECTIONS=['programs','games','drivers'];
+function storeBucket(p){ const top=storeTopOf(p); if(top==='games'||top==='game') return 'games'; if(top==='drivers'||top==='driver') return 'drivers'; return 'programs'; }
+function storeSubName(p){ const parts=String(p.catPath||p.cat||'').split('/').filter(Boolean); const top=(parts[0]||'').toLowerCase();
+  if(['programs','program','games','game','drivers','driver'].indexOf(top)>=0) return parts.slice(1).join('/');   // канонический раздел -> подраздел после него
+  return parts.join('/'); }   // иначе весь путь — как подраздел внутри «Программы»
 function storeTopLabel(tp){ const ru=lang==='ru'; const m={
     games:'🎮 '+(ru?'Игры':'Games'), game:'🎮 '+(ru?'Игры':'Games'),
     drivers:'🖴 '+(ru?'Драйверы':'Drivers'), driver:'🖴 '+(ru?'Драйверы':'Drivers'),
@@ -1418,12 +1424,13 @@ function renderStore(){ const tb=$('storeTabs'), body=$('storeBody'); if(!tb||!b
     const hits=storePrograms.filter(p=> (p.name+' '+p.id+' '+(p.desc||'')+' '+(p.catPath||'')).toLowerCase().indexOf(q)>=0);
     body.innerHTML=''; if(!hits.length){ body.innerHTML='<div class="dd-hint" style="margin:0">'+t('storeEmpty')+'</div>'; return; }
     const grid=document.createElement('div'); grid.style.cssText=STORE_GRID; hits.forEach(p=>grid.appendChild(storeCard(p))); body.appendChild(grid); return; }
-  const tops=[]; storePrograms.forEach(p=>{ const tp=storeTopOf(p); if(tops.indexOf(tp)<0) tops.push(tp); });
+  const tops=STORE_SECTIONS;   // всегда показываем все три раздела
   if(!storeTab || tops.indexOf(storeTab)<0){ storeTab=tops[0]; storeSub=null; }
   // вкладки разделов (клик сбрасывает выбранный подраздел)
   tb.innerHTML=''; tops.forEach(tp=>{ const b=document.createElement('button'); b.type='button'; b.className='dd-btn'+(tp===storeTab?'':' dd-ghost'); b.textContent=storeTopLabel(tp); b.onclick=()=>{ storeTab=tp; storeSub=null; renderStore(); }; tb.appendChild(b); });
-  const list=storePrograms.filter(p=>storeTopOf(p)===storeTab);
-  const subs={}; list.forEach(p=>{ const s=storeSubOf(p)||''; (subs[s]=subs[s]||[]).push(p); });
+  const list=storePrograms.filter(p=>storeBucket(p)===storeTab);
+  const subs={}; list.forEach(p=>{ const s=storeSubName(p)||''; (subs[s]=subs[s]||[]).push(p); });
+  if(!list.length){ body.innerHTML='<div class="dd-hint" style="margin:0">'+t('storeEmpty')+'</div>'; return; }
   const subKeys=Object.keys(subs).filter(s=>s).sort();   // именованные подразделы
   body.innerHTML='';
   // если подразделов нет — сразу программы
@@ -1519,8 +1526,8 @@ function storeCard(p){ const c=document.createElement('div');
   const panel=document.createElement('div'); panel.style.cssText='display:none;margin-top:6px;border-top:1px solid var(--sh);padding-top:6px';
   if(PROGRAMS_REPO.token() && p.base){
     const sel=document.createElement('select'); sel.style.cssText='width:100%;box-sizing:border-box';
-    [['programs',storeTopLabel('programs')],['games',storeTopLabel('games')],['drivers',storeTopLabel('drivers')]].forEach(([v,lab])=>{ const o=document.createElement('option'); o.value=v; o.textContent=lab; if(storeTopOf(p)===v) o.selected=true; sel.appendChild(o); });
-    const subi=document.createElement('input'); subi.type='text'; subi.placeholder=t('pubSub'); subi.value=storeSubOf(p); subi.style.cssText='width:100%;box-sizing:border-box;margin-top:4px';
+    [['programs',storeTopLabel('programs')],['games',storeTopLabel('games')],['drivers',storeTopLabel('drivers')]].forEach(([v,lab])=>{ const o=document.createElement('option'); o.value=v; o.textContent=lab; if(storeBucket(p)===v) o.selected=true; sel.appendChild(o); });
+    const subi=document.createElement('input'); subi.type='text'; subi.placeholder=t('pubSub'); subi.value=storeSubName(p); subi.style.cssText='width:100%;box-sizing:border-box;margin-top:4px';
     const go=document.createElement('button'); go.type='button'; go.className='dd-btn'; go.textContent='↪ '+t('storeMove'); go.style.marginTop='4px';
     const st=document.createElement('span'); st.className='dd-hint'; st.style.cssText='margin:0 0 0 6px';
     go.onclick=async()=>{ go.disabled=true; const nsub=(subi.value||'').trim().replace(/[^A-Za-z0-9_\-\/]/g,'').toLowerCase();
