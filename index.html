@@ -224,7 +224,7 @@
 
 <div class="dd-win">
   <div class="dd-topbar"><span class="ico">🐙</span><h1>GitDOS</h1>
-    <span class="dd-ver"><span data-i18n="tagline">Твой DOS живёт в репозитории</span> · сборка 153</span>
+    <span class="dd-ver"><span data-i18n="tagline">Твой DOS живёт в репозитории</span> · сборка 157</span>
     <span id="apiLimit" class="dd-apilimit" title=""></span>
     <span style="margin-left:8px;display:flex;gap:4px">
       <button id="langRu" class="dd-btn" type="button" style="min-height:0;padding:1px 8px">RU</button>
@@ -238,6 +238,7 @@
         <a class="dd-navlink" data-open="settingsModal" data-i18n="navDisks">⚙️ Общие настройки</a>
         <a class="dd-navlink" data-open="uploadModal" data-i18n="navUpload">📤 Загрузка файлов</a>
         <a class="dd-navlink" data-open="launcherModal" data-i18n="navLauncher">🖥️ Лаунчер</a>
+        <a class="dd-navlink" data-open="storeModal" data-i18n="navStore">🏪 GitDOS Store</a>
         <a class="dd-navlink" data-open="shareModal" data-i18n="navShare">🔗 Поделиться</a>
         <a class="dd-navlink" data-open="historyModal" data-i18n="navHistory">🕓 История диска</a>
         <a class="dd-navlink" data-open="kbModal" data-i18n="navKb">📖 База знаний</a>
@@ -388,6 +389,9 @@
           <div class="dd-card">
             <div class="dd-hint" style="margin-top:0" data-i18n="hintCatalog">Откуда DOS-команда INSTALL берёт программы: owner/repo или owner/repo/подпапка. По умолчанию — каталог проекта GitDOS.</div>
             <input id="catalogRepo" type="text" autocomplete="off" placeholder="sementsul/GitDOS/programs" style="margin-top:8px">
+            <label data-i18n="lblCatalogToken" style="margin-top:8px">Токен каталога (только для публикации программ)</label>
+            <input id="catalogToken" type="password" autocomplete="off" placeholder="github_pat_… (repo write)">
+            <div class="dd-hint" style="margin-top:4px" data-i18n="hintCatalogToken">⚠️ Нужен только чтобы публиковать свои программы в каталог (GitDOS Store → «Опубликовать»). Токен с правом записи в этот репозиторий. Хранится только в браузере, в код/коммиты не попадает.</div>
           </div>
         </div>
 
@@ -542,6 +546,53 @@
       <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
         <a id="recDownload" class="dd-btn" download="gitdos-session.webm" data-i18n="btnRecDownload">⬇️ Скачать .webm</a>
         <span id="recInfo" class="dd-hint" style="margin:0;align-self:center"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- окно: GitDOS Store (витрина каталога INSTALL) -->
+<div class="dd-modal" id="storeModal">
+  <div class="dd-modal-box" style="width:760px;max-width:96vw">
+    <div class="dd-modal-h"><b data-i18n="mStore">🏪 GitDOS Store</b><button class="dd-btn dd-modalclose" data-close="storeModal" type="button">✕</button></div>
+    <div class="dd-wiz-body" style="max-height:none">
+      <div class="dd-hint" style="margin-top:0" data-i18n="storeHint">Каталог программ, игр и драйверов. Зайди в раздел и нажми «Установить» — в DOS-терминале выполнится команда INSTALL.</div>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center">
+        <input id="storeSearch" type="text" autocomplete="off" data-i18n-ph="phStoreSearch" placeholder="🔎 поиск по программам…" style="flex:1;min-width:180px;box-sizing:border-box">
+        <button id="storePublishBtn" class="dd-btn" type="button" data-i18n="btnStorePublish">📤 Опубликовать</button>
+      </div>
+      <div id="storeTabs" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px"></div>
+      <div id="storeBody" style="margin-top:10px;min-height:120px"></div>
+      <!-- форма публикации -->
+      <div id="storePublish" style="display:none;margin-top:10px">
+        <div class="dd-hint" style="margin-top:0" data-i18n="publishHint">Опубликовать свою программу в каталог (твой репозиторий). Нужен «Токен каталога» в «🧩 Каталог программ». Файлы и манифест install.json запишутся через GitHub API.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+          <div><label style="margin-top:0" data-i18n="pubSection">Раздел</label>
+            <select id="pubSection" style="width:100%;box-sizing:border-box">
+              <option value="programs" data-i18n="pubSecPrograms">Программы</option>
+              <option value="games" data-i18n="pubSecGames">Игры</option>
+              <option value="drivers" data-i18n="pubSecDrivers">Драйверы</option>
+            </select></div>
+          <div><label style="margin-top:0" data-i18n="pubSub">Подраздел (необяз.)</label>
+            <input id="pubSub" type="text" autocomplete="off" placeholder="archivers" style="width:100%;box-sizing:border-box"></div>
+          <div><label style="margin-top:0" data-i18n="pubId">id (англ., одно слово)</label>
+            <input id="pubId" type="text" autocomplete="off" placeholder="arj" style="width:100%;box-sizing:border-box"></div>
+          <div><label style="margin-top:0" data-i18n="pubName">Название</label>
+            <input id="pubName" type="text" autocomplete="off" placeholder="ARJ" style="width:100%;box-sizing:border-box"></div>
+          <div><label style="margin-top:0" data-i18n="pubVersion">Версия</label>
+            <input id="pubVersion" type="text" autocomplete="off" placeholder="2.41" style="width:100%;box-sizing:border-box"></div>
+          <div><label style="margin-top:0" data-i18n="pubRun">Чем запускать (необяз.)</label>
+            <input id="pubRun" type="text" autocomplete="off" placeholder="ARJ.EXE" style="width:100%;box-sizing:border-box"></div>
+        </div>
+        <label style="margin-top:8px" data-i18n="pubDesc">Описание</label>
+        <input id="pubDesc" type="text" autocomplete="off" placeholder="" style="width:100%;box-sizing:border-box">
+        <label style="margin-top:8px" data-i18n="pubFiles">Файлы программы (.EXE/.COM/…)</label>
+        <input id="pubFiles" type="file" multiple>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button id="pubSubmit" class="dd-btn" type="button" data-i18n="btnPubSubmit">📤 Опубликовать</button>
+          <button id="pubCancel" class="dd-btn dd-ghost" type="button" data-i18n="btnPubCancel">Отмена</button>
+          <span id="pubStatus" class="dd-hint" style="margin:0;align-self:center"></span>
+        </div>
       </div>
     </div>
   </div>
@@ -717,6 +768,10 @@
         <p><b>📝 Генерация файлов (<code>MAKE:</code>).</b> При включённом <b>авто-выполнении</b> ассистент может создавать файлы на диске: в ответе он пишет строку <code>MAKE: путь</code> (например <code>MAKE: HELLO.BAT</code>), затем содержимое файла, и завершает строкой <code>ENDMAKE</code>. Хост записывает файл в репозиторий и <b>перемонтирует диск</b>, чтобы новый файл появился в DOS (проверь <code>DIR</code>). Так ассистент пишет <code>.BAT</code>-скрипты и текстовые файлы по запросу («напиши bat, который выводит дату» и т.п.). Без авто-выполнения <code>MAKE</code> не исполняется (только показывается).</p>
         <p><b>🎯 Макросы (<code>AIMACRO</code>).</b> Сохранённые задачи-заготовки. В «🤖 Ассистент» задаёшь <b>имя</b> (одно слово) и <b>текст задачи</b> — он сохраняется в браузере (localStorage). В DOS: <code>AIMACRO</code> — список макросов, <code>AIMACRO имя</code> — запустить макрос (его текст уходит ассистенту как задача). Запустить можно и кнопкой <b>▶</b> прямо в настройках. Удобно для частых задач (бэкап, генерация отчёта, уборка временных файлов и т.п.).</p>
 
+        <h3>🏪 GitDOS Store (витрина каталога)</h3>
+        <p>Пункт меню «🏪 GitDOS Store» — визуальная витрина того же каталога, что и команда <code>INSTALL</code>. Навигация в глубину: сверху — разделы (🎮 Игры / 💿 Программы / 🖴 Драйверы), нажимаешь раздел → появляется <b>список подразделов</b> (архиваторы, файловые менеджеры, браузеры… с числом программ), нажимаешь подраздел → открывается <b>список программ</b> с версией, размером, описанием (кнопка «← Разделы» — назад). Если в разделе нет подразделов, программы показываются сразу. Кнопка <b>«Установить»</b> на карточке закрывает окно и <b>выполняет в DOS-терминале команду <code>INSTALL &lt;id&gt;</code></b> — то есть установка идёт штатным путём пакетного менеджера. Уже установленные помечены «✓ Установлено». Каталог тот же и настраивается там же («🧩 Каталог программ»); двухуровневая раскладка — это путь <code>&lt;раздел&gt;/&lt;подраздел&gt;/&lt;id&gt;/install.json</code> в репозитории. Вверху окна — <b>🔎 поиск</b> по всем программам (имя/id/описание/раздел).</p>
+        <p><b>📤 Публикация программ.</b> Кнопка «📤 Опубликовать» в Store — выложить <b>свою</b> программу в каталог (твой репозиторий) прямо из браузера через GitHub API. Укажи раздел (Программы/Игры/Драйверы), подраздел (напр. archivers), id, название, версию, описание, чем запускать, и выбери файлы программы. GitDOS соберёт манифест <code>install.json</code> и запишет его вместе с файлами по пути <code>&lt;раздел&gt;/&lt;подраздел&gt;/&lt;id&gt;/</code>. Нужен <b>«Токен каталога»</b> с правом записи в этот репозиторий — задаётся в «🧩 Каталог программ» (хранится только в браузере, в код/коммиты не попадает). После публикации программа сразу появляется в Store и доступна команде <code>INSTALL</code>. ⚠️ Публикуй только в доверенный каталог: манифест может прописывать строки в AUTOEXEC/CONFIG у того, кто ставит программу.</p>
+        <p><b>↪ Перемещение между разделами.</b> Если задан «Токен каталога», на карточке программы появляется кнопка <b>↪</b> — переместить программу в другой раздел/подраздел своего каталога. Выбери раздел (Программы/Игры/Драйверы) и подраздел, нажми «Переместить» — GitDOS перенесёт папку программы (все файлы + <code>install.json</code>) на новый путь через GitHub API (запись по новому пути и удаление по старому) и обновит витрину. Видно только для своего каталога (где есть право записи).</p>
         <h3>Команда INSTALL (пакетный менеджер программ)</h3>
         <p>В DOS из любой папки: <code>INSTALL</code> — список доступных программ (по категориям, <code>*</code> = установлена); <code>INSTALL &lt;id&gt;</code> — установить. Программы берутся из репозитория проекта <b>sementsul/GitDOS</b>, папка <code>programs/&lt;категория&gt;/&lt;id&gt;/</code> (с манифестом <code>install.json</code>). Установка: файлы качаются в <code>C:\PROGRAMS\&lt;dir&gt;</code>, путь добавляется в <code>PATH</code> (управляемый блок <code>REM GITDOS:&lt;id&gt;</code> в AUTOEXEC.BAT, идемпотентно), плюс строки <code>autoexec</code>/<code>config</code> из манифеста; затем диск перемонтируется. Установленное уходит в твой репозиторий автосохранением. Чтение каталога — через raw (лимит API не тратит). Формат и пример — в <code>programs/README.md</code> репозитория. <code>INSTALL INFO &lt;id&gt;</code> — карточка программы (версия, размер, описание, что пропишется в конфиги) перед установкой; в манифесте можно задать <code>desc</code> и <code>version</code>. <b>Источник каталога настраивается</b> в «⚙️ Общие настройки» → «🧩 Каталог программ» (<code>owner/repo</code> или <code>owner/repo/подпапка</code>, по умолчанию <code>sementsul/GitDOS/programs</code>) — можно держать отдельный репозиторий-каталог. ⚠️ Указывай только доверенный источник (манифест может править AUTOEXEC/CONFIG).</p>
         <p><code>UNINSTALL &lt;id&gt;</code> — удалить установленную программу: стирает файлы из <code>C:\PROGRAMS\&lt;dir&gt;</code> (удаление уедет в репозиторий автосохранением) и вырезает её управляемый блок <code>REM GITDOS:&lt;id&gt;</code> из AUTOEXEC.BAT и CONFIG.SYS. Папку <code>&lt;dir&gt;</code> берёт из манифеста, а если программы уже нет в каталоге — из самого блока в AUTOEXEC.</p>
@@ -907,7 +962,7 @@ function saveCfg(){ localStorage.setItem('dosdisk_cfg', JSON.stringify(cfg)); }
 const I18N = {
   ru: {
     tagline:'Твой DOS живёт в репозитории', navDisks:'⚙️ Общие настройки', navUpload:'📤 Загрузка файлов',
-    navLauncher:'🖥️ Лаунчер', navShare:'🔗 Поделиться', navHistory:'🕓 История диска', navKb:'📖 База знаний', navAbout:'ℹ️ О программе',
+    navLauncher:'🖥️ Лаунчер', navStore:'🏪 GitDOS Store', mStore:'🏪 GitDOS Store', storeHint:'Каталог программ, игр и драйверов. Зайди в раздел и нажми «Установить» — в DOS-терминале выполнится команда INSTALL.', storeInstall:'Установить', storeInstalled:'Установлено', storeEmpty:'Каталог пуст или недоступен', storeLoading:'Загружаю каталог…', storeNeedDisk:'Сначала запусти диск, чтобы устанавливать программы', phStoreSearch:'🔎 поиск по программам…', btnStorePublish:'📤 Опубликовать', publishHint:'Опубликовать свою программу в каталог (твой репозиторий). Нужен «Токен каталога» в «🧩 Каталог программ». Файлы и манифест install.json запишутся через GitHub API.', pubSection:'Раздел', pubSecPrograms:'Программы', pubSecGames:'Игры', pubSecDrivers:'Драйверы', pubSub:'Подраздел (необяз.)', pubId:'id (англ., одно слово)', pubName:'Название', pubVersion:'Версия', pubRun:'Чем запускать (необяз.)', pubDesc:'Описание', pubFiles:'Файлы программы (.EXE/.COM/…)', btnPubSubmit:'📤 Опубликовать', btnPubCancel:'Отмена', storeMove:'Переместить в другой раздел', navShare:'🔗 Поделиться', navHistory:'🕓 История диска', navKb:'📖 База знаний', navAbout:'ℹ️ О программе',
     mShare:'🔗 Поделиться диском', shareHint:'Ссылка открывает GitDOS сразу с этим диском (репозиторий C:). Подходит для публичных репозиториев — токен в ссылку НЕ попадает.', btnShareCopy:'Копировать',
     mLauncher:'🖥️ Лаунчер', launchHint:'Программы (.EXE/.COM/.BAT) из репозитория C:. Клик по «▶ Запустить» монтирует диск и сразу стартует выбранную программу.', btnLaunchLoad:'Обновить список',
     mHistory:'🕓 История диска C:', histHint:'Диск C: — это git-репозиторий, поэтому видна вся история. Можно смонтировать прошлую версию диска (только чтение) или восстановить отдельный файл.',
@@ -930,7 +985,7 @@ const I18N = {
     stepExtra:'Дополнительные репозитории',
     stepMountSel:'Что монтировать (выборочно)', hintMountSel:'Чтобы большой диск стартовал быстрее, можно не грузить тяжёлые папки. Сними галочки — эти папки/файлы не попадут на диск при «Пуск» (в репозитории они остаются и не удаляются).', btnMountSelLoad:'Показать содержимое диска C:',
     stepManifest:'Манифест .gitdos.json', hintManifest:'Необязательный файл .gitdos.json в корне диска: имя диска (в заголовок), что запускать (run) и скорость CPU (cycles). С ним диск стартует сразу в нужную программу.', btnManifest:'📦 Создать шаблон .gitdos.json',
-    stepCatalog:'Каталог программ (INSTALL)', hintCatalog:'Откуда DOS-команда INSTALL берёт программы: owner/repo или owner/repo/подпапка. По умолчанию — каталог проекта GitDOS.',
+    stepCatalog:'Каталог программ (INSTALL)', hintCatalog:'Откуда DOS-команда INSTALL берёт программы: owner/repo или owner/repo/подпапка. По умолчанию — каталог проекта GitDOS.', lblCatalogToken:'Токен каталога (только для публикации программ)', hintCatalogToken:'⚠️ Нужен только чтобы публиковать свои программы в каталог (GitDOS Store → «Опубликовать»). Токен с правом записи в этот репозиторий. Хранится только в браузере, в код/коммиты не попадает.',
     stepAi:'Ассистент (Claude)', hintAi:'Команда AI в DOS спрашивает Claude. Нужен API-ключ Anthropic. ⚠️ Ключ хранится только в браузере, запросы идут напрямую на api.anthropic.com (ключ виден в браузере — для личного использования) и платные.', lblAiKey:'API-ключ Anthropic', lblAiModel:'Модель', lblAiRun:'⚠️ Авто-выполнение: ассистент сам запускает предложенные команды в DOS (для автоматизации). Без галочки — команда кладётся в поле ввода на твоё подтверждение.', lblAiSteps:'Лимит шагов агента (0 = без лимита)', lblAiAsk:'Задаёт уточняющие вопросы (всплывают диалогом). Без галочки — решает сам и делает разумные допущения.', lblAiTts:'🔊 Озвучивать ответы ассистента голосом (TTS, синтез речи браузера). Ответы английские → озвучка en-US.', lblAiTtsCues:'🔔 Озвучивать команды (мастер): подсказки «speak», запись экрана и запуск команд DOS.', hintCmdVoice:'Выборочно — какие команды озвучивать:', lblAiTtsErrors:'⚠️ Озвучивать ошибки голосом (красные сообщения в логе).', lblAiLogVoice:'🗣️ Полная озвучка логов: проговаривать ВСЕ сообщения лога (вкл/выкл также командой LOGVOICE в DOS).', lblAiMacros:'🎯 Макросы ассистента (запуск из DOS: AIMACRO имя)', hintAiMacros:'Сохранённые задачи. В DOS: AIMACRO — список, AIMACRO имя — запустить. Имя — одно слово (англ./цифры).', phMacroName:'имя (одно слово)', phMacroTask:'текст задачи для ассистента…', btnMacroAdd:'➕ Сохранить макрос', macroEmpty:'Макросов пока нет', macroDel:'удалить', macroRun:'запустить', lblAiMemory:'🧠 Долговременная память: ассистент помнит факты между сессиями (файл AIMEMO.TXT в репозитории, директива MEMO).', lblAiVision:'👁️ Ассистент видит экран: к запросу прикладывается снимок экрана DOS (vision-модель). Больше токенов/стоимость. Директива LOOK обновляет снимок.', btnMemView:'🧠 Показать / очистить память', lblSched:'⏰ Планировщик задач ассистента', hintSched:'Задачи запускаются автоматически: «при старте диска» или «каждые N минут». Нужен включённый диск и API-ключ.', phSchedTask:'текст задачи для ассистента…', schedStart:'при старте диска', schedInterval:'каждые N минут', btnSchedAdd:'➕ Добавить', schedEmpty:'Задач пока нет', schedDel:'удалить', stepNet:'Сетевая игра (IPX)', hintNet:'Мультиплеер для IPX-игр DOS (Doom, Duke3D, Warcraft…). Два игрока с одинаковой «комнатой» соединяются через relay. Игра должна быть на диске; в самой игре выбери сетевой режим IPX.', lblNetOn:'Включить сеть IPX (применяется при следующем «Пуск»)', lblNetRoom:'Комната (общий код для игроков)', lblNetBackend:'Relay-сервер (WebSocket)', warnNet:'⚠️ Публичный relay — внешний сервис: трафик игры идёт через сторонний сервер. Нужен интернет. Для приватности можно указать свой relay.',
     stepSysEdit:'Загрузочные файлы', hintSysEdit:'Правка AUTOEXEC.BAT и CONFIG.SYS прямо в браузере — что выполняется при старте диска и драйверы DOS.', btnSysEdit2:'⚙️ Редактировать AUTOEXEC.BAT / CONFIG.SYS',
     mSysEdit:'⚙️ AUTOEXEC.BAT и CONFIG.SYS', sysHint:'Загрузочные файлы диска C:. Изменения сохраняются в репозиторий (нужен токен) или на запущенный диск. Применяются при следующем «Пуск».', btnSysReload:'↻ Перечитать', btnSysSave:'💾 Сохранить',
@@ -951,7 +1006,7 @@ const I18N = {
   },
   en: {
     tagline:'your DOS lives in a repo', navDisks:'⚙️ General settings', navUpload:'📤 Upload files',
-    navLauncher:'🖥️ Launcher', mLauncher:'🖥️ Launcher', launchHint:'Programs (.EXE/.COM/.BAT) from repository C:. Click “▶ Run” to mount the disk and start the selected program right away.', btnLaunchLoad:'Refresh list',
+    navLauncher:'🖥️ Launcher', mLauncher:'🖥️ Launcher', launchHint:'Programs (.EXE/.COM/.BAT) from repository C:. Click “▶ Run” to mount the disk and start the selected program right away.', btnLaunchLoad:'Refresh list', navStore:'🏪 GitDOS Store', mStore:'🏪 GitDOS Store', storeHint:'Catalog of programs, games and drivers. Open a section and click “Install” — the INSTALL command runs in the DOS terminal.', storeInstall:'Install', storeInstalled:'Installed', storeEmpty:'Catalog is empty or unavailable', storeLoading:'Loading catalog…', storeNeedDisk:'Start the disk first to install programs', phStoreSearch:'🔎 search programs…', btnStorePublish:'📤 Publish', publishHint:'Publish your own program to the catalog (your repo). Needs the “Catalog token” in “🧩 Program catalog”. Files and the install.json manifest are written via the GitHub API.', pubSection:'Section', pubSecPrograms:'Programs', pubSecGames:'Games', pubSecDrivers:'Drivers', pubSub:'Subsection (optional)', pubId:'id (latin, one word)', pubName:'Name', pubVersion:'Version', pubRun:'Run command (optional)', pubDesc:'Description', pubFiles:'Program files (.EXE/.COM/…)', btnPubSubmit:'📤 Publish', btnPubCancel:'Cancel', storeMove:'Move to another section',
     navShare:'🔗 Share', mShare:'🔗 Share disk', shareHint:'The link opens GitDOS straight to this disk (repository C:). For public repositories — the token is NOT included in the link.', btnShareCopy:'Copy',
     navHistory:'🕓 Disk history', mHistory:'🕓 Disk C: history', histHint:'Disk C: is a git repository, so the full history is available. You can mount a past version of the disk (read-only) or restore an individual file.',
     histSnaps:'Whole-disk snapshots', btnHistLoad:'Load history', histFileH:'Single-file history', histFileLbl:'File path (from C: root)', btnHistFile:'Show file history',
@@ -974,7 +1029,7 @@ const I18N = {
     stepExtra:'Additional repositories',
     stepMountSel:'What to mount (selective)', hintMountSel:'To make a large disk start faster, you can skip heavy folders. Uncheck them — those folders/files won’t be loaded on Run (they stay in the repository and are not deleted).', btnMountSelLoad:'Show disk C: contents',
     stepManifest:'.gitdos.json manifest', hintManifest:'Optional .gitdos.json in the disk root: disk name (title bar), what to run (run) and CPU speed (cycles). With it the disk boots straight into the program.', btnManifest:'📦 Create .gitdos.json template',
-    stepCatalog:'Program catalog (INSTALL)', hintCatalog:'Where the DOS INSTALL command takes programs from: owner/repo or owner/repo/subpath. Default — the GitDOS project catalog.',
+    stepCatalog:'Program catalog (INSTALL)', hintCatalog:'Where the DOS INSTALL command takes programs from: owner/repo or owner/repo/subpath. Default — the GitDOS project catalog.', lblCatalogToken:'Catalog token (only to publish programs)', hintCatalogToken:'⚠️ Needed only to publish your own programs to the catalog (GitDOS Store → “Publish”). A token with write access to that repo. Stored only in the browser, never in code/commits.',
     stepAi:'Assistant (Claude)', hintAi:'The AI command in DOS asks Claude. Needs an Anthropic API key. ⚠️ The key is stored only in the browser, requests go directly to api.anthropic.com (key is visible in the browser — for personal use) and are billed.', lblAiKey:'Anthropic API key', lblAiModel:'Model', lblAiRun:'⚠️ Auto-run: the assistant runs its suggested commands in DOS itself (automation). Without it — the command goes to the input field for your confirmation.', lblAiSteps:'Agent step limit (0 = no limit)', lblAiAsk:'Ask clarifying questions (shown as a dialog). Without it — decides itself and makes reasonable assumptions.', lblAiTts:'🔊 Speak assistant answers aloud (TTS, browser speech synthesis). Answers are English → en-US voice.', lblAiTtsCues:'🔔 Speak commands (master): “speak” cue, screen recording and DOS command launches.', hintCmdVoice:'Selectively — which commands to voice:', lblAiTtsErrors:'⚠️ Speak errors aloud (red log messages).', lblAiLogVoice:'🗣️ Full log voicing: speak ALL log messages (also toggled by the LOGVOICE command in DOS).', lblAiMacros:'🎯 Assistant macros (run from DOS: AIMACRO name)', hintAiMacros:'Saved tasks. In DOS: AIMACRO — list, AIMACRO name — run. Name = one word (latin/digits).', phMacroName:'name (one word)', phMacroTask:'task text for the assistant…', btnMacroAdd:'➕ Save macro', macroEmpty:'No macros yet', macroDel:'delete', macroRun:'run', lblAiMemory:'🧠 Long-term memory: the assistant remembers facts across sessions (file AIMEMO.TXT in the repo, MEMO directive).', lblAiVision:'👁️ The assistant sees the screen: a DOS screenshot is attached to the request (vision model). More tokens/cost. The LOOK directive refreshes the shot.', btnMemView:'🧠 Show / clear memory', lblSched:'⏰ Assistant task scheduler', hintSched:'Tasks run automatically: “on disk start” or “every N minutes”. Needs a running disk and an API key.', phSchedTask:'task text for the assistant…', schedStart:'on disk start', schedInterval:'every N minutes', btnSchedAdd:'➕ Add', schedEmpty:'No tasks yet', schedDel:'delete', stepNet:'Network game (IPX)', hintNet:'Multiplayer for IPX DOS games (Doom, Duke3D, Warcraft…). Two players with the same “room” connect via a relay. The game must be on the disk; pick IPX network mode inside the game.', lblNetOn:'Enable IPX network (applies on next “Start”)', lblNetRoom:'Room (shared code for players)', lblNetBackend:'Relay server (WebSocket)', warnNet:'⚠️ Public relay is an external service: game traffic goes through a third-party server. Needs internet. For privacy you can set your own relay.',
     stepSysEdit:'Boot files', hintSysEdit:'Edit AUTOEXEC.BAT and CONFIG.SYS in the browser — what runs at disk startup and DOS drivers.', btnSysEdit2:'⚙️ Edit AUTOEXEC.BAT / CONFIG.SYS',
     mSysEdit:'⚙️ AUTOEXEC.BAT & CONFIG.SYS', sysHint:'Boot files of disk C:. Changes are saved to the repository (token needed) or to the running disk. Applied on the next Run.', btnSysReload:'↻ Reload', btnSysSave:'💾 Save',
@@ -1147,7 +1202,7 @@ function makeRepo(getConf){ return {
 const GitHub = makeRepo(()=>cfg.github);   // основной диск C:
 // источник программ для INSTALL — настраиваемый каталог (по умолчанию репо проекта, папка programs/)
 function programsConf(){ const v=(cfg.programs||'sementsul/GitDOS/programs').trim();
-  const seg=v.split('/'); return { repo: seg.slice(0,2).join('/'), branch:'main', path: seg.slice(2).join('/') }; }
+  const seg=v.split('/'); return { repo: seg.slice(0,2).join('/'), branch:'main', path: seg.slice(2).join('/'), token: cfg.programsToken||'' }; }
 const PROGRAMS_REPO = makeRepo(programsConf);
 // разобрать каталог: вернуть список программ из install.json-манифестов (с размерами и описанием)
 async function listPrograms(){
@@ -1164,10 +1219,11 @@ async function listPrograms(){
     const seg=base.split('/'); const id=(j.id||seg[seg.length-1]||'prog').toLowerCase();
     const dir=(j.dir||seg[seg.length-1]||'prog').toUpperCase().replace(/[^A-Z0-9_]/g,'').slice(0,8) || 'PROG';
     const cat=seg.length>1?seg[0]:(j.category||'misc');
+    const catPath = base.indexOf('/')>=0 ? base.slice(0, base.lastIndexOf('/')) : (j.category||'misc');   // путь категории без папки программы (для 2 уровней в Store)
     const fileItems=items.filter(x=> x.path.startsWith(base+'/') && !/install\.json$/i.test(x.path));
     const files=fileItems.map(x=> ({ rel:x.path, name:x.path.slice(base.length+1) }));
     const size=fileItems.reduce((s,x)=>s+(x.size||0),0);
-    progs.push({ id, name:j.name||id, cat, dir, run:j.run||'', desc:j.desc||'', version:j.version||'', size,
+    progs.push({ id, name:j.name||id, cat, catPath, base, dir, run:j.run||'', desc:j.desc||'', version:j.version||'', size,
                  addPath:j.path!==false, autoexec:j.autoexec||[], config:j.config||[], files });
   }
   return progs.sort((a,b)=> (a.cat+'/'+a.id).localeCompare(b.cat+'/'+b.id));
@@ -1335,6 +1391,144 @@ function renderCmdVoice(){ const box=$('cmdVoiceList'); if(!box) return; box.inn
     cb.addEventListener('change',()=>{ cfg.ai.cmdVoice[key]=cb.checked; saveCfg(); });
     lab.appendChild(cb); lab.appendChild(document.createTextNode(label)); box.appendChild(lab); });
   updateCmdVoiceBox();
+}
+// ---------- GitDOS Store (витрина каталога INSTALL) ----------
+let storePrograms=null, storeInstalled=new Set(), storeTab=null, storeSub=null, storeQuery='';
+const STORE_GRID='display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px';
+function storeTopOf(p){ return (String(p.catPath||p.cat||'misc').split('/')[0]||'misc').toLowerCase(); }
+function storeSubOf(p){ return String(p.catPath||p.cat||'').split('/').slice(1).join('/'); }
+function storeTopLabel(tp){ const ru=lang==='ru'; const m={
+    games:'🎮 '+(ru?'Игры':'Games'), game:'🎮 '+(ru?'Игры':'Games'),
+    drivers:'🖴 '+(ru?'Драйверы':'Drivers'), driver:'🖴 '+(ru?'Драйверы':'Drivers'),
+    programs:'💿 '+(ru?'Программы':'Programs'), apps:'💿 '+(ru?'Программы':'Programs'), tools:'🧰 '+(ru?'Утилиты':'Tools') };
+  return m[tp]||('📁 '+tp); }
+async function openStoreLoad(){ if(!$('storeBody')) return;
+  storeQuery=''; if($('storeSearch')) $('storeSearch').value=''; storeShowPublish(false);
+  $('storeTabs').innerHTML=''; $('storeBody').innerHTML='<div class="dd-hint" style="margin:0">'+t('storeLoading')+'</div>';
+  try{ storePrograms=await listPrograms(); }
+  catch(e){ storePrograms=[]; $('storeBody').innerHTML='<div class="dd-hint" style="margin:0">❌ '+esc(e.message)+'</div>'; return; }
+  storeInstalled=new Set();
+  if(ci){ try{ const files=await fsList(); storePrograms.forEach(p=>{ if(progInstalled(p, files)) storeInstalled.add(p.id); }); }catch(_){} }
+  storeTab=null; storeSub=null; renderStore();
+}
+function renderStore(){ const tb=$('storeTabs'), body=$('storeBody'); if(!tb||!body) return;
+  if(!storePrograms||!storePrograms.length){ tb.innerHTML=''; body.innerHTML='<div class="dd-hint" style="margin:0">'+t('storeEmpty')+'</div>'; return; }
+  const q=(storeQuery||'').trim().toLowerCase();
+  if(q){ tb.innerHTML='';   // поиск — плоский список по всем разделам
+    const hits=storePrograms.filter(p=> (p.name+' '+p.id+' '+(p.desc||'')+' '+(p.catPath||'')).toLowerCase().indexOf(q)>=0);
+    body.innerHTML=''; if(!hits.length){ body.innerHTML='<div class="dd-hint" style="margin:0">'+t('storeEmpty')+'</div>'; return; }
+    const grid=document.createElement('div'); grid.style.cssText=STORE_GRID; hits.forEach(p=>grid.appendChild(storeCard(p))); body.appendChild(grid); return; }
+  const tops=[]; storePrograms.forEach(p=>{ const tp=storeTopOf(p); if(tops.indexOf(tp)<0) tops.push(tp); });
+  if(!storeTab || tops.indexOf(storeTab)<0){ storeTab=tops[0]; storeSub=null; }
+  // вкладки разделов (клик сбрасывает выбранный подраздел)
+  tb.innerHTML=''; tops.forEach(tp=>{ const b=document.createElement('button'); b.type='button'; b.className='dd-btn'+(tp===storeTab?'':' dd-ghost'); b.textContent=storeTopLabel(tp); b.onclick=()=>{ storeTab=tp; storeSub=null; renderStore(); }; tb.appendChild(b); });
+  const list=storePrograms.filter(p=>storeTopOf(p)===storeTab);
+  const subs={}; list.forEach(p=>{ const s=storeSubOf(p)||''; (subs[s]=subs[s]||[]).push(p); });
+  const subKeys=Object.keys(subs).filter(s=>s).sort();   // именованные подразделы
+  body.innerHTML='';
+  // если подразделов нет — сразу программы
+  if(!subKeys.length){ const grid=document.createElement('div'); grid.style.cssText=STORE_GRID; (subs['']||[]).forEach(p=>grid.appendChild(storeCard(p))); body.appendChild(grid); return; }
+  // уровень подразделов: показываем список разделов (архиваторы, файловые менеджеры…)
+  if(storeSub===null || storeSub===undefined || (storeSub && !subs[storeSub])){
+    const wrap=document.createElement('div'); wrap.style.cssText=STORE_GRID;
+    subKeys.forEach(s=>{ const card=document.createElement('button'); card.type='button'; card.className='dd-btn dd-ghost';
+      card.style.cssText='text-align:left;padding:12px;font-size:14px'; card.textContent='📂 '+s+'  ('+subs[s].length+')';
+      card.onclick=()=>{ storeSub=s; renderStore(); }; wrap.appendChild(card); });
+    if((subs['']||[]).length){ const card=document.createElement('button'); card.type='button'; card.className='dd-btn dd-ghost';
+      card.style.cssText='text-align:left;padding:12px;font-size:14px'; card.textContent='📄 '+(lang==='ru'?'Без раздела':'Uncategorized')+'  ('+subs[''].length+')';
+      card.onclick=()=>{ storeSub=''; renderStore(); }; wrap.appendChild(card); }
+    body.appendChild(wrap); return;
+  }
+  // уровень программ выбранного подраздела: «← назад» + сетка
+  const back=document.createElement('button'); back.type='button'; back.className='dd-btn dd-ghost'; back.style.marginBottom='8px';
+  back.textContent='← '+(lang==='ru'?'Разделы':'Sections'); back.onclick=()=>{ storeSub=null; renderStore(); }; body.appendChild(back);
+  const hdr=document.createElement('div'); hdr.style.cssText='font-weight:bold;margin:4px 0 8px'; hdr.textContent='📂 '+(storeSub||(lang==='ru'?'Без раздела':'Uncategorized')); body.appendChild(hdr);
+  const grid=document.createElement('div'); grid.style.cssText=STORE_GRID; (subs[storeSub]||[]).forEach(p=>grid.appendChild(storeCard(p))); body.appendChild(grid);
+}
+// показать/скрыть форму публикации
+function storeShowPublish(on){ if($('storePublish')) $('storePublish').style.display=on?'block':'none';
+  ['storeTabs','storeBody','storeSearch','storePublishBtn'].forEach(id=>{ if($(id)) $(id).style.display=on?'none':''; }); }
+// опубликовать программу в каталог (свой репозиторий) через GitHub API
+async function storePublish(){ const st=$('pubStatus'); const set=m=>{ if(st) st.textContent=m; };
+  if(!PROGRAMS_REPO.ready()){ set(lang==='ru'?'Укажи каталог (owner/repo) в настройках':'Set catalog (owner/repo) in settings'); return; }
+  if(!PROGRAMS_REPO.token()){ set(lang==='ru'?'Нужен «Токен каталога» в настройках':'Catalog token required in settings'); return; }
+  const top=$('pubSection').value;
+  const sub=($('pubSub').value||'').trim().replace(/[^A-Za-z0-9_-]/g,'').toLowerCase();
+  const id=($('pubId').value||'').trim().replace(/[^A-Za-z0-9_-]/g,'').toLowerCase();
+  if(!id){ set(lang==='ru'?'Укажи id (англ.)':'Enter id (latin)'); return; }
+  const files=Array.from(($('pubFiles').files)||[]);
+  if(!files.length){ set(lang==='ru'?'Добавь файлы программы':'Add program files'); return; }
+  const name=($('pubName').value||'').trim()||id;
+  const dir=id.toUpperCase().replace(/[^A-Z0-9_]/g,'').slice(0,8)||'PROG';
+  const manifest={ name, id, dir }; const ver=($('pubVersion').value||'').trim(); if(ver) manifest.version=ver;
+  const desc=($('pubDesc').value||'').trim(); if(desc) manifest.desc=desc;
+  const run=($('pubRun').value||'').trim(); if(run) manifest.run=run;
+  const base = top + (sub?('/'+sub):'') + '/' + id;   // путь относительно sub каталога
+  $('pubSubmit').disabled=true; set(lang==='ru'?'Публикую…':'Publishing…');
+  try{ PROGRAMS_REPO._sha={};
+    await PROGRAMS_REPO.write(base+'/install.json', enc(JSON.stringify(manifest,null,2)));
+    let n=0; for(const f of files){ const buf=new Uint8Array(await f.arrayBuffer());
+      await PROGRAMS_REPO.write(base+'/'+f.name.replace(/[^\w.\-]/g,'_'), buf); n++; set((lang==='ru'?'Загружено ':'Uploaded ')+n+'/'+files.length); }
+    log('🏪 '+(lang==='ru'?'Опубликовано в каталог: ':'Published to catalog: ')+base);
+    set(lang==='ru'?('Опубликовано: '+id+' ✓'):('Published: '+id+' ✓')); PROGRAMS_REPO._tcache=null;
+    setTimeout(()=>{ storeShowPublish(false); openStoreLoad(); }, 900);
+  }catch(e){ set('❌ '+e.message); log('🏪 publish: '+e.message,'dd-warn'); }
+  finally{ $('pubSubmit').disabled=false; }
+}
+// переместить программу между разделами: запись по новому пути + удаление по старому (GitHub API)
+async function moveProgram(p, newTop, newSub, statusFn){ const set=statusFn||(()=>{});
+  if(!PROGRAMS_REPO.token()){ set(lang==='ru'?'Нужен токен каталога':'Catalog token required'); return false; }
+  const oldBase=p.base; const idDir=oldBase.split('/').pop();
+  const newBase=newTop+(newSub?('/'+newSub):'')+'/'+idDir;
+  if(newBase.toLowerCase()===oldBase.toLowerCase()){ set(lang==='ru'?'Тот же раздел':'Same section'); return false; }
+  // список файлов программы (install.json + файлы) относительно sub
+  const rels=[oldBase+'/install.json'].concat((p.files||[]).map(f=>f.rel));
+  try{
+    // свежие sha для удаления
+    const tree=await PROGRAMS_REPO._trees(); const sub=PROGRAMS_REPO.sub();
+    PROGRAMS_REPO._sha={}; (tree.tree||[]).forEach(n=>{ if(n.type==='blob'){ const rel=sub?n.path.slice(sub.length+1):n.path; PROGRAMS_REPO._sha[rel]=n.sha; }});
+    let n=0; for(const rel of rels){ if(PROGRAMS_REPO._sha[rel]===undefined) continue;   // нет на месте — пропускаем
+      const data=await PROGRAMS_REPO.read(rel);
+      const nrel=newBase+rel.slice(oldBase.length);
+      pushMsg='gitdos: move '+p.id+' -> '+newBase; await PROGRAMS_REPO.write(nrel, data.slice()); pushMsg=null;
+      await PROGRAMS_REPO.del(rel); n++; set((lang==='ru'?'Перенос ':'Moving ')+n+'/'+rels.length); }
+    log('🏪 '+(lang==='ru'?'Перемещено: ':'Moved: ')+p.id+' → '+newBase);
+    PROGRAMS_REPO._tcache=null; return true;
+  }catch(e){ pushMsg=null; set('❌ '+e.message); log('🏪 move: '+e.message,'dd-warn'); return false; }
+}
+function storeCard(p){ const c=document.createElement('div');
+  c.style.cssText='border:1px solid var(--sh);padding:8px;display:flex;flex-direction:column;gap:3px;background:#fff';
+  const installed=storeInstalled.has(p.id);
+  const meta=[p.version&&('v'+p.version), p.size&&(Math.max(1,Math.round(p.size/1024))+' '+(lang==='ru'?'КБ':'KB'))].filter(Boolean).join(' · ');
+  c.innerHTML='<div style="font-weight:bold">'+esc(p.name)+'</div>'+
+    (meta?'<div style="color:var(--mut);font-size:12px">'+esc(meta)+'</div>':'')+
+    (p.desc?'<div style="font-size:12px">'+esc(p.desc.slice(0,100))+'</div>':'')+
+    '<div style="color:var(--mut);font-size:11px">id: '+esc(p.id)+'</div>';
+  const row=document.createElement('div'); row.style.cssText='display:flex;gap:4px;margin-top:4px;flex-wrap:wrap';
+  const btn=document.createElement('button'); btn.type='button';
+  if(installed){ btn.className='dd-btn dd-ghost'; btn.disabled=true; btn.textContent='✓ '+t('storeInstalled'); }
+  else { btn.className='dd-btn'; btn.textContent='⬇️ '+t('storeInstall');
+    btn.onclick=()=>{ if(!ci){ log(t('storeNeedDisk'),'dd-warn'); return; }
+      closeModal('storeModal'); log('🏪 '+(lang==='ru'?'Установка из Store: ':'Install from Store: ')+p.id); runDosCommand('INSTALL '+p.id); }; }
+  row.appendChild(btn);
+  // перемещение между разделами — только если есть токен каталога (запись в свой репо)
+  if(PROGRAMS_REPO.token() && p.base){ const mv=document.createElement('button'); mv.type='button'; mv.className='dd-btn dd-ghost'; mv.title=t('storeMove'); mv.textContent='↪';
+    mv.onclick=()=>{ panel.style.display = panel.style.display==='none'?'block':'none'; }; row.appendChild(mv); }
+  c.appendChild(row);
+  // инлайн-панель перемещения
+  const panel=document.createElement('div'); panel.style.cssText='display:none;margin-top:6px;border-top:1px solid var(--sh);padding-top:6px';
+  if(PROGRAMS_REPO.token() && p.base){
+    const sel=document.createElement('select'); sel.style.cssText='width:100%;box-sizing:border-box';
+    [['programs',storeTopLabel('programs')],['games',storeTopLabel('games')],['drivers',storeTopLabel('drivers')]].forEach(([v,lab])=>{ const o=document.createElement('option'); o.value=v; o.textContent=lab; if(storeTopOf(p)===v) o.selected=true; sel.appendChild(o); });
+    const subi=document.createElement('input'); subi.type='text'; subi.placeholder=t('pubSub'); subi.value=storeSubOf(p); subi.style.cssText='width:100%;box-sizing:border-box;margin-top:4px';
+    const go=document.createElement('button'); go.type='button'; go.className='dd-btn'; go.textContent='↪ '+t('storeMove'); go.style.marginTop='4px';
+    const st=document.createElement('span'); st.className='dd-hint'; st.style.cssText='margin:0 0 0 6px';
+    go.onclick=async()=>{ go.disabled=true; const nsub=(subi.value||'').trim().replace(/[^A-Za-z0-9_\-\/]/g,'').toLowerCase();
+      const ok=await moveProgram(p, sel.value, nsub, m=>{ st.textContent=m; });
+      go.disabled=false; if(ok){ st.textContent='✓'; setTimeout(openStoreLoad, 700); } };
+    panel.appendChild(sel); panel.appendChild(subi); const r2=document.createElement('div'); r2.style.cssText='display:flex;align-items:center'; r2.appendChild(go); r2.appendChild(st); panel.appendChild(r2);
+  }
+  c.appendChild(panel); return c;
 }
 function renderSched(){ const box=$('aiSchedList'); if(!box) return; box.innerHTML='';
   const list=(cfg.ai&&Array.isArray(cfg.ai.schedule))?cfg.ai.schedule:[];
@@ -2810,6 +3004,8 @@ function init(){
   $('manifestBtn').onclick=createManifestTemplate;
   if($('catalogRepo')){ $('catalogRepo').value=cfg.programs||'';
     $('catalogRepo').addEventListener('input',()=>{ cfg.programs=$('catalogRepo').value.trim(); saveCfg(); PROGRAMS_REPO._tcache=null; PROGRAMS_REPO._private=undefined; }); }
+  if($('catalogToken')){ $('catalogToken').value=cfg.programsToken||'';
+    $('catalogToken').addEventListener('input',()=>{ cfg.programsToken=$('catalogToken').value.trim(); saveCfg(); PROGRAMS_REPO._tcache=null; }); }
   if($('aiKey')){ cfg.ai=cfg.ai||{}; $('aiKey').value=cfg.ai.key||''; $('aiModel').value=cfg.ai.model||'';
     $('aiKey').addEventListener('input',()=>{ (cfg.ai=cfg.ai||{}).key=$('aiKey').value.trim(); saveCfg(); });
     $('aiModel').addEventListener('input',()=>{ (cfg.ai=cfg.ai||{}).model=$('aiModel').value.trim(); saveCfg(); });
@@ -2871,7 +3067,11 @@ function init(){
   $('histLoad').onclick=histLoadDisk; $('histFileLoad').onclick=histLoadFile;
   $('histFile').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); histLoadFile(); } });
   // ссылки слева открывают окна; крестики и клик по фону закрывают
-  document.querySelectorAll('.dd-navlink').forEach(a=> a.onclick=()=>openModal(a.dataset.open));
+  document.querySelectorAll('.dd-navlink').forEach(a=> a.onclick=()=>{ openModal(a.dataset.open); if(a.dataset.open==='storeModal') openStoreLoad(); });
+  if($('storeSearch')) $('storeSearch').addEventListener('input',()=>{ storeQuery=$('storeSearch').value; renderStore(); });
+  if($('storePublishBtn')) $('storePublishBtn').onclick=()=>storeShowPublish(true);
+  if($('pubCancel')) $('pubCancel').onclick=()=>storeShowPublish(false);
+  if($('pubSubmit')) $('pubSubmit').onclick=storePublish;
   document.querySelectorAll('.dd-modalclose').forEach(b=> b.onclick=()=>closeModal(b.dataset.close));
   document.querySelectorAll('.dd-modal').forEach(m=> m.addEventListener('click', e=>{ if(e.target===m) closeModal(m.id); }));
 
