@@ -224,7 +224,7 @@
 
 <div class="dd-win">
   <div class="dd-topbar"><span class="ico">🐙</span><h1>GitDOS</h1>
-    <span class="dd-ver"><span data-i18n="tagline">Твой DOS живёт в репозитории</span> · сборка 158</span>
+    <span class="dd-ver"><span data-i18n="tagline">Твой DOS живёт в репозитории</span> · сборка 159</span>
     <span id="apiLimit" class="dd-apilimit" title=""></span>
     <span style="margin-left:8px;display:flex;gap:4px">
       <button id="langRu" class="dd-btn" type="button" style="min-height:0;padding:1px 8px">RU</button>
@@ -769,7 +769,7 @@
         <p><b>🎯 Макросы (<code>AIMACRO</code>).</b> Сохранённые задачи-заготовки. В «🤖 Ассистент» задаёшь <b>имя</b> (одно слово) и <b>текст задачи</b> — он сохраняется в браузере (localStorage). В DOS: <code>AIMACRO</code> — список макросов, <code>AIMACRO имя</code> — запустить макрос (его текст уходит ассистенту как задача). Запустить можно и кнопкой <b>▶</b> прямо в настройках. Удобно для частых задач (бэкап, генерация отчёта, уборка временных файлов и т.п.).</p>
 
         <h3>🏪 GitDOS Store (витрина каталога)</h3>
-        <p>Пункт меню «🏪 GitDOS Store» — визуальная витрина того же каталога, что и команда <code>INSTALL</code>. Навигация в глубину: сверху — <b>три фиксированных раздела всегда</b> (💿 Программы / 🎮 Игры / 🖴 Драйверы; определяются по верхнему сегменту пути — <code>games/</code>, <code>drivers/</code>, остальное → Программы), нажимаешь раздел → появляется <b>список подразделов</b> (архиваторы, файловые менеджеры, браузеры… с числом программ), нажимаешь подраздел → открывается <b>список программ</b> с версией, размером, описанием (кнопка «← Разделы» — назад). Если в разделе нет подразделов, программы показываются сразу. Кнопка <b>«Установить»</b> на карточке закрывает окно и <b>выполняет в DOS-терминале команду <code>INSTALL &lt;id&gt;</code></b> — установка идёт <b>только</b> штатным путём пакетного менеджера (никакой отдельной установки из веба нет). <code>INSTALL</code> находит программу по <code>id</code> независимо от вложенности раздела/подраздела, так что ставит из любого из трёх разделов. Уже установленные помечены «✓ Установлено». Каталог тот же и настраивается там же («🧩 Каталог программ»); двухуровневая раскладка — это путь <code>&lt;раздел&gt;/&lt;подраздел&gt;/&lt;id&gt;/install.json</code> в репозитории. Вверху окна — <b>🔎 поиск</b> по всем программам (имя/id/описание/раздел).</p>
+        <p>Пункт меню «🏪 GitDOS Store» — визуальная витрина того же каталога, что и команда <code>INSTALL</code>. Навигация в глубину: сверху — <b>три фиксированных раздела всегда</b> (💿 Программы / 🎮 Игры / 🖴 Драйверы; определяются по верхнему сегменту пути — <code>games/</code>, <code>drivers/</code>, остальное → Программы), нажимаешь раздел → появляется <b>список подразделов</b> (архиваторы, файловые менеджеры, браузеры… с числом программ), нажимаешь подраздел → открывается <b>список программ</b> с версией, размером, описанием (кнопка «← Разделы» — назад). Если в разделе нет подразделов, программы показываются сразу. Кнопка <b>«Установить»</b> на карточке закрывает окно и <b>выполняет в DOS-терминале команду <code>INSTALL &lt;id&gt;</code></b> — установка идёт <b>только</b> штатным путём пакетного менеджера (никакой отдельной установки из веба нет). <code>INSTALL</code> находит программу по <code>id</code> независимо от вложенности раздела/подраздела, так что ставит из любого из трёх разделов. Уже установленные помечены «✓ Установлено». Каталог тот же и настраивается там же («🧩 Каталог программ»); двухуровневая раскладка — это путь <code>&lt;раздел&gt;/&lt;подраздел&gt;/&lt;id&gt;/install.json</code> в репозитории. Вверху окна — <b>🔎 поиск</b> по всем программам (имя/id/описание/раздел). <b>Встроенный каталог:</b> даже без подключения к репозиторию (или если он пуст/недоступен) Store не пустой — показываются встроенные демо-программы во всех трёх разделах (System Info, Tree View, Welcome, ASCII Art, Fortune, Driver Info). Они ставятся тем же <code>INSTALL &lt;id&gt;</code> (файлы — текстовые .BAT, пишутся на диск без скачивания, работают офлайн). Программы из настроенного каталога подмешиваются к встроенным (и перекрывают одноимённые).</p>
         <p><b>📤 Публикация программ.</b> Кнопка «📤 Опубликовать» в Store — выложить <b>свою</b> программу в каталог (твой репозиторий) прямо из браузера через GitHub API. Укажи раздел (Программы/Игры/Драйверы), подраздел (напр. archivers), id, название, версию, описание, чем запускать, и выбери файлы программы. GitDOS соберёт манифест <code>install.json</code> и запишет его вместе с файлами по пути <code>&lt;раздел&gt;/&lt;подраздел&gt;/&lt;id&gt;/</code>. Нужен <b>«Токен каталога»</b> с правом записи в этот репозиторий — задаётся в «🧩 Каталог программ» (хранится только в браузере, в код/коммиты не попадает). После публикации программа сразу появляется в Store и доступна команде <code>INSTALL</code>. ⚠️ Публикуй только в доверенный каталог: манифест может прописывать строки в AUTOEXEC/CONFIG у того, кто ставит программу.</p>
         <p><b>↪ Перемещение между разделами.</b> Если задан «Токен каталога», на карточке программы появляется кнопка <b>↪</b> — переместить программу в другой раздел/подраздел своего каталога. Выбери раздел (Программы/Игры/Драйверы) и подраздел, нажми «Переместить» — GitDOS перенесёт папку программы (все файлы + <code>install.json</code>) на новый путь через GitHub API (запись по новому пути и удаление по старому) и обновит витрину. Видно только для своего каталога (где есть право записи).</p>
         <h3>Команда INSTALL (пакетный менеджер программ)</h3>
@@ -1204,36 +1204,63 @@ const GitHub = makeRepo(()=>cfg.github);   // основной диск C:
 function programsConf(){ const v=(cfg.programs||'sementsul/GitDOS/programs').trim();
   const seg=v.split('/'); return { repo: seg.slice(0,2).join('/'), branch:'main', path: seg.slice(2).join('/'), token: cfg.programsToken||'' }; }
 const PROGRAMS_REPO = makeRepo(programsConf);
-// разобрать каталог: вернуть список программ из install.json-манифестов (с размерами и описанием)
+// встроенный (offline) демо-каталог — показывается всегда, даже без подключения к репозиторию.
+// Файлы — текстовые .BAT, зовущие внутренние команды DOS (работают без скачивания). Реальные программы — из настроенного каталога.
+const BUILTIN_CATALOG=[
+  { sec:'programs/tools', id:'sysinfo', name:'System Info', version:'1.0', desc:'Show DOS version and free memory.', run:'SYSINFO.BAT',
+    files:[{name:'SYSINFO.BAT', text:'@ECHO OFF\r\nECHO === GitDOS System Info ===\r\nVER\r\nMEM\r\n'}] },
+  { sec:'programs/tools', id:'treeview', name:'Tree View', version:'1.0', desc:'Show the C: directory tree.', run:'TREEVIEW.BAT',
+    files:[{name:'TREEVIEW.BAT', text:'@ECHO OFF\r\nTREE C:\\ /F\r\n'}] },
+  { sec:'programs/text', id:'welcome', name:'Welcome Note', version:'1.0', desc:'Print a welcome text.', run:'WELCOME.BAT',
+    files:[{name:'WELCOME.BAT', text:'@ECHO OFF\r\nTYPE WELCOME.TXT\r\n'},{name:'WELCOME.TXT', text:'Welcome to GitDOS!\r\nYour disk C: is a GitHub repository.\r\nType GITDOS HELP for commands.\r\n'}] },
+  { sec:'games/demos', id:'art', name:'ASCII Art', version:'1.0', desc:'Show ASCII art on screen.', run:'ART.BAT',
+    files:[{name:'ART.BAT', text:'@ECHO OFF\r\nECHO   ____ _ _   ____   ___  ____\r\nECHO  / ___(_) |_|  _ \\ / _ \\/ ___|\r\nECHO ^| ^|  _^| ^| __^| ^| ^| ^| ^| ^| \\___ \\\r\nECHO ^| ^|_^| ^| ^| ^|_^| ^|_^| ^| ^|_^| ^|___) ^|\r\nECHO  \\____^|_^|\\__^|____/ \\___/^|____/\r\n'}] },
+  { sec:'games/demos', id:'fortune', name:'Fortune', version:'1.0', desc:'Print a random-ish fortune.', run:'FORTUNE.BAT',
+    files:[{name:'FORTUNE.BAT', text:'@ECHO OFF\r\nECHO Your fortune: A clean commit is a happy commit.\r\n'}] },
+  { sec:'drivers/system', id:'drvinfo', name:'Driver Info', version:'1.0', desc:'Info about DOS drivers (demo).', run:'DRVINFO.BAT',
+    files:[{name:'DRVINFO.BAT', text:'@ECHO OFF\r\nECHO Demo driver entry. Real drivers load via CONFIG.SYS.\r\nTYPE C:\\CONFIG.SYS\r\n'}] }
+];
+function builtinPrograms(){ return BUILTIN_CATALOG.map(e=>{ const dir=(e.dir||e.id).toUpperCase().replace(/[^A-Z0-9_]/g,'').slice(0,8)||'PROG';
+  const size=e.files.reduce((s,f)=>s+((f.text||'').length),0);
+  return { id:e.id, name:e.name, cat:e.sec.split('/')[0], catPath:e.sec, base:e.sec+'/'+e.id, dir, run:e.run||'', desc:e.desc||'', version:e.version||'',
+           size, addPath:e.path!==false, autoexec:e.autoexec||[], config:e.config||[], builtin:true, files:e.files.map(f=>({name:f.name, text:f.text})) }; }); }
+// разобрать каталог: программы из install.json-манифестов настроенного репо + встроенные демо
 async function listPrograms(){
-  const sub=PROGRAMS_REPO.sub();
-  const tree=await PROGRAMS_REPO._trees();
-  let blobs=(tree.tree||[]).filter(n=>n.type==='blob'); if(sub) blobs=blobs.filter(n=>n.path===sub||n.path.startsWith(sub+'/'));
-  PROGRAMS_REPO._sha={};
-  const items=blobs.map(b=>{ const p=sub?b.path.slice(sub.length+1):b.path; PROGRAMS_REPO._sha[p]=b.sha; return {path:p, size:b.size||0}; });
   const progs=[];
-  for(const it of items){
-    if(!/(^|\/)install\.json$/i.test(it.path) || it.path.indexOf('/')<0) continue;
-    const base = it.path.slice(0, it.path.lastIndexOf('/'));   // '<cat>/<id>'
-    let j={}; try{ j=JSON.parse(new TextDecoder().decode(await PROGRAMS_REPO.read(it.path))); }catch(_){ continue; }
-    const seg=base.split('/'); const id=(j.id||seg[seg.length-1]||'prog').toLowerCase();
-    const dir=(j.dir||seg[seg.length-1]||'prog').toUpperCase().replace(/[^A-Z0-9_]/g,'').slice(0,8) || 'PROG';
-    const cat=seg.length>1?seg[0]:(j.category||'misc');
-    const catPath = base.indexOf('/')>=0 ? base.slice(0, base.lastIndexOf('/')) : (j.category||'misc');   // путь категории без папки программы (для 2 уровней в Store)
-    const fileItems=items.filter(x=> x.path.startsWith(base+'/') && !/install\.json$/i.test(x.path));
-    const files=fileItems.map(x=> ({ rel:x.path, name:x.path.slice(base.length+1) }));
-    const size=fileItems.reduce((s,x)=>s+(x.size||0),0);
-    progs.push({ id, name:j.name||id, cat, catPath, base, dir, run:j.run||'', desc:j.desc||'', version:j.version||'', size,
-                 addPath:j.path!==false, autoexec:j.autoexec||[], config:j.config||[], files });
-  }
+  try{
+    const sub=PROGRAMS_REPO.sub();
+    const tree=await PROGRAMS_REPO._trees();
+    let blobs=(tree.tree||[]).filter(n=>n.type==='blob'); if(sub) blobs=blobs.filter(n=>n.path===sub||n.path.startsWith(sub+'/'));
+    PROGRAMS_REPO._sha={};
+    const items=blobs.map(b=>{ const p=sub?b.path.slice(sub.length+1):b.path; PROGRAMS_REPO._sha[p]=b.sha; return {path:p, size:b.size||0}; });
+    for(const it of items){
+      if(!/(^|\/)install\.json$/i.test(it.path) || it.path.indexOf('/')<0) continue;
+      const base = it.path.slice(0, it.path.lastIndexOf('/'));   // '<cat>/<id>'
+      let j={}; try{ j=JSON.parse(new TextDecoder().decode(await PROGRAMS_REPO.read(it.path))); }catch(_){ continue; }
+      const seg=base.split('/'); const id=(j.id||seg[seg.length-1]||'prog').toLowerCase();
+      const dir=(j.dir||seg[seg.length-1]||'prog').toUpperCase().replace(/[^A-Z0-9_]/g,'').slice(0,8) || 'PROG';
+      const cat=seg.length>1?seg[0]:(j.category||'misc');
+      const catPath = base.indexOf('/')>=0 ? base.slice(0, base.lastIndexOf('/')) : (j.category||'misc');
+      const fileItems=items.filter(x=> x.path.startsWith(base+'/') && !/install\.json$/i.test(x.path));
+      const files=fileItems.map(x=> ({ rel:x.path, name:x.path.slice(base.length+1) }));
+      const size=fileItems.reduce((s,x)=>s+(x.size||0),0);
+      progs.push({ id, name:j.name||id, cat, catPath, base, dir, run:j.run||'', desc:j.desc||'', version:j.version||'', size,
+                   addPath:j.path!==false, autoexec:j.autoexec||[], config:j.config||[], files });
+    }
+  }catch(e){ log('🏪 каталог GitHub недоступен ('+e.message+') — показываю встроенные'); }   // без репо/сети показываем встроенные
+  const ids=new Set(progs.map(p=>p.id));
+  for(const b of builtinPrograms()){ if(!ids.has(b.id)) progs.push(b); }   // встроенные не перетирают одноимённые из репо
   return progs.sort((a,b)=> (a.cat+'/'+a.id).localeCompare(b.cat+'/'+b.id));
 }
 function progInstalled(p, onDisk){ const pre=('PROGRAMS/'+p.dir+'/').toLowerCase(); for(const x of onDisk) if(x.toLowerCase().startsWith(pre)) return true; return false; }
 // установить программу p на диск (скачать файлы + прописать в конфиги). БЕЗ перемонтирования — его делает вызывающий
 async function doInstall(p){ let n=0;
-  for(const f of p.files){ try{ const data=await PROGRAMS_REPO.read(f.rel); await ci.fsWriteFile('PROGRAMS/'+p.dir+'/'+f.name, data.slice()); n++; }catch(e){ log('  '+f.name+': '+e.message,'dd-warn'); } }
+  for(const f of p.files){ try{
+      const data = p.builtin ? enc(f.text||'') : (await PROGRAMS_REPO.read(f.rel)).slice();
+      await ci.fsWriteFile('PROGRAMS/'+p.dir+'/'+f.name, data); n++;
+    }catch(e){ log('  '+f.name+': '+e.message,'dd-warn'); } }
   try{ await registerProgram(p); }catch(e){ log('  конфиг: '+e.message,'dd-warn'); }
-  log('🖥️ Установлено '+p.id+': '+n+' файлов'+(p.addPath?' (+PATH)':'')); return n; }
+  log('🖥️ Установлено '+p.id+': '+n+' файлов'+(p.addPath?' (+PATH)':'')+(p.builtin?' (встроенная)':'')); return n; }
 // удалить установленную программу id (файлы + блок в конфигах). Возвращает {removed,dir} или null
 async function doUninstall(id, onDisk){
   let dir=null; try{ const pr=(await listPrograms()).find(x=>x.id===id); if(pr) dir=pr.dir; }catch(_){}
@@ -1518,13 +1545,13 @@ function storeCard(p){ const c=document.createElement('div');
     btn.onclick=()=>{ if(!ci){ log(t('storeNeedDisk'),'dd-warn'); return; }
       closeModal('storeModal'); log('🏪 '+(lang==='ru'?'Установка из Store: ':'Install from Store: ')+p.id); runDosCommand('INSTALL '+p.id); }; }
   row.appendChild(btn);
-  // перемещение между разделами — только если есть токен каталога (запись в свой репо)
-  if(PROGRAMS_REPO.token() && p.base){ const mv=document.createElement('button'); mv.type='button'; mv.className='dd-btn dd-ghost'; mv.title=t('storeMove'); mv.textContent='↪';
+  // перемещение между разделами — только для программ из репо (не встроенных) и при наличии токена каталога
+  if(PROGRAMS_REPO.token() && p.base && !p.builtin){ const mv=document.createElement('button'); mv.type='button'; mv.className='dd-btn dd-ghost'; mv.title=t('storeMove'); mv.textContent='↪';
     mv.onclick=()=>{ panel.style.display = panel.style.display==='none'?'block':'none'; }; row.appendChild(mv); }
   c.appendChild(row);
   // инлайн-панель перемещения
   const panel=document.createElement('div'); panel.style.cssText='display:none;margin-top:6px;border-top:1px solid var(--sh);padding-top:6px';
-  if(PROGRAMS_REPO.token() && p.base){
+  if(PROGRAMS_REPO.token() && p.base && !p.builtin){
     const sel=document.createElement('select'); sel.style.cssText='width:100%;box-sizing:border-box';
     [['programs',storeTopLabel('programs')],['games',storeTopLabel('games')],['drivers',storeTopLabel('drivers')]].forEach(([v,lab])=>{ const o=document.createElement('option'); o.value=v; o.textContent=lab; if(storeBucket(p)===v) o.selected=true; sel.appendChild(o); });
     const subi=document.createElement('input'); subi.type='text'; subi.placeholder=t('pubSub'); subi.value=storeSubName(p); subi.style.cssText='width:100%;box-sizing:border-box;margin-top:4px';
