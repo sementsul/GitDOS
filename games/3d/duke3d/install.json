@@ -1,0 +1,8 @@
+{
+  "name": "Duke Nukem 3D",
+  "id": "duke3d",
+  "dir": "DUKE3D",
+  "version": "1.0",
+  "desc": "Duke Nukem 3D is a 1996 first-person shooter game developed by 3D Realms and published by FormGen for MS-DOS.",
+  "run": "DUKE3D.EXE"
+}
