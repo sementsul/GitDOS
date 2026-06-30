@@ -1,0 +1,9 @@
+{
+  "name": "DOOM",
+  "id": "doom",
+  "dir": "DOOM",
+  "run": "doom.exe",
+  "path": false,
+  "version": "1.9",
+  "desc": "Doom is a 1993 first-person shooter game developed and published by id Software for MS-DOS."
+}
