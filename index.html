@@ -139,6 +139,9 @@
     width:100%; font:12px Tahoma,sans-serif; background:#fff; color:#000; padding:4px 6px;
     border:2px solid; border-color:var(--sh) #fff #fff var(--sh); }
   .dd-row{ display:flex; gap:8px; } .dd-row>*{ flex:1; min-width:0; }
+  .dd-formrow{ display:flex; align-items:center; gap:10px; margin:7px 0; }
+  .dd-formrow label{ flex:0 0 150px; font-size:12px; color:var(--navy); }
+  .dd-formrow select, .dd-formrow input{ flex:1; min-width:0; }
   .dd-step{ margin:0 0 14px; }
   .dd-step-h{ display:flex; align-items:center; gap:8px; margin:0 0 8px; font-weight:700; font-size:12px; }
   .dd-num{ width:18px; height:18px; flex:0 0 18px; background:var(--navy); color:#fff; font-size:11px; font-weight:700;
@@ -205,9 +208,30 @@
   .dd-kb p{ margin:4px 0; font-size:12px; line-height:1.5; }
   .dd-kb ul{ margin:4px 0; padding-left:18px; font-size:12px; line-height:1.5; }
   .dd-kb code{ background:#e6e6e6; padding:0 3px; font:11px Consolas,monospace; }
+  /* embed-режим (?embed=1): только DOS-экран, весь хром скрыт — для вставки на сторонний сайт через iframe.
+     Растягиваем всю цепочку контейнеров на высоту iframe, а #dos — гибкий (без aspect-ratio, иначе низ обрезается). */
+  html.dd-embed, html.dd-embed body{ margin:0; padding:0; height:100%; background:#000; overflow:hidden; }
+  html.dd-embed .dd-topbar, html.dd-embed .dd-sidebar, html.dd-embed .dd-dialog-head,
+  html.dd-embed .dd-dialog-tb, html.dd-embed .dd-logh, html.dd-embed #log,
+  html.dd-embed #apiLimit{ display:none !important; }
+  html.dd-embed .dd-win{ height:100%; min-height:0; display:flex; flex-direction:column; border:0; margin:0; box-shadow:none; }
+  html.dd-embed .dd-body{ flex:1 1 auto; min-height:0; display:flex; align-items:stretch; }
+  html.dd-embed .dd-desktop{ flex:1 1 auto; min-width:0; min-height:0; padding:0; display:block; }
+  html.dd-embed .dd-dialog{ width:100% !important; max-width:none !important; height:100%; margin:0; border:0; box-shadow:none; display:flex; flex-direction:column; }
+  html.dd-embed .dd-dialog-in{ flex:1 1 auto; min-height:0; padding:6px; gap:6px; display:flex; flex-direction:column; }
+  html.dd-embed #dos{ flex:1 1 auto; min-height:0; height:auto; aspect-ratio:auto; overflow:hidden; }
+  html.dd-embed #dos canvas{ width:100% !important; height:100% !important; object-fit:contain; }
+  html.dd-embed .dd-bar{ flex:0 0 auto; } html.dd-embed .dd-cmdbar{ flex:0 0 auto; }
+  html.dd-embed.dd-embed-nobar .dd-bar, html.dd-embed.dd-embed-nobar .dd-cmdbar{ display:none !important; }
 </style>
 </head>
 <body>
+<script>
+  // embed-режим определяем максимально рано — до отрисовки, чтобы не мелькал полный интерфейс.
+  (function(){ try{ var sp=new URLSearchParams(location.search); var e=sp.get('embed');
+    if(e==='1'||e==='true'){ var h=document.documentElement; h.classList.add('dd-embed');
+      if(sp.get('bar')==='0') h.classList.add('dd-embed-nobar'); } }catch(_){} })();
+</script>
 <!-- Yandex.Metrika counter -->
 <script type="text/javascript">
     (function(m,e,t,r,i,k,a){
@@ -224,7 +248,7 @@
 
 <div class="dd-win">
   <div class="dd-topbar"><span class="ico">🐙</span><h1>GitDOS</h1>
-    <span class="dd-ver"><span data-i18n="tagline">Твой DOS живёт в репозитории</span> · сборка 159</span>
+    <span class="dd-ver"><span data-i18n="tagline">Твой DOS живёт в репозитории</span> · сборка 173</span>
     <span id="apiLimit" class="dd-apilimit" title=""></span>
     <span style="margin-left:8px;display:flex;gap:4px">
       <button id="langRu" class="dd-btn" type="button" style="min-height:0;padding:1px 8px">RU</button>
@@ -240,6 +264,7 @@
         <a class="dd-navlink" data-open="launcherModal" data-i18n="navLauncher">🖥️ Лаунчер</a>
         <a class="dd-navlink" data-open="storeModal" data-i18n="navStore">🏪 GitDOS Store</a>
         <a class="dd-navlink" data-open="shareModal" data-i18n="navShare">🔗 Поделиться</a>
+        <a class="dd-navlink" data-open="embedModal" data-i18n="navEmbed">🧩 Код для сайта</a>
         <a class="dd-navlink" data-open="historyModal" data-i18n="navHistory">🕓 История диска</a>
         <a class="dd-navlink" data-open="kbModal" data-i18n="navKb">📖 База знаний</a>
         <a class="dd-navlink" data-open="supportModal" data-i18n="navSupport">💛 Поддержать проект</a>
@@ -644,6 +669,70 @@
   </div>
 </div>
 
+<!-- окно: конструктор кода для вставки GitDOS на сторонний сайт (Embed) -->
+<div class="dd-modal" id="embedModal">
+  <div class="dd-modal-box" style="width:620px">
+    <div class="dd-modal-h"><b data-i18n="mEmbed">🧩 Код для вставки на сайт</b><button class="dd-btn dd-modalclose" data-close="embedModal" type="button">✕</button></div>
+    <div class="dd-wiz-body" style="max-height:calc(100vh - 90px)">
+      <div class="dd-hint" style="margin-top:0" data-i18n="embHint">Задай параметры — получишь готовый код. Вставь его на свою страницу, и GitDOS загрузится в рамке. Публичный репозиторий токена не требует.</div>
+      <div class="dd-formrow"><label data-i18n="embRepo">Репозиторий (owner/name)</label><input id="embRepo" placeholder="owner/name"></div>
+      <div class="dd-formrow"><label data-i18n="embBranch">Ветка</label><input id="embBranch" placeholder="main"></div>
+      <div class="dd-formrow"><label data-i18n="embRun">Автозапуск (необяз.)</label><input id="embRun" placeholder="GAME.EXE"></div>
+      <div class="dd-formrow"><label data-i18n="embSize">Размер (Ш×В)</label>
+        <input id="embW" placeholder="100%" style="flex:1"><input id="embH" placeholder="480px" style="flex:1"></div>
+      <div class="dd-formrow"><label data-i18n="embHost">Адрес GitDOS</label><input id="embHost" placeholder="https://sementsul.github.io/GitDOS/"></div>
+      <div class="dd-formrow"><label data-i18n="embBar">Показывать кнопки/строку</label><input id="embBar" type="checkbox" checked style="width:auto"></div>
+      <div class="dd-formrow"><label data-i18n="embTok">Вставить токен (приватный)</label><input id="embTok" type="checkbox" style="width:auto"></div>
+      <div id="embTokWarn" class="dd-hint dd-warn" style="display:none" data-i18n="embTokWarn">🔴 Токен попадёт в код страницы и будет виден её посетителям. Вставляй с токеном только на закрытой/доверенной странице. Для публичного репозитория токен не нужен.</div>
+
+      <div class="dd-formrow" style="align-items:center;margin-top:10px"><label data-i18n="embVar">Вариант</label>
+        <select id="embVar"><option value="sdl" data-i18n="embVarSdl">SDK (рекомендуется)</option><option value="iframe" data-i18n="embVarIframe">iframe (без JS, только публичный)</option></select></div>
+      <textarea id="embOut" class="dd-ta" style="height:150px" readonly onclick="this.select()"></textarea>
+      <div class="dd-row" style="margin-top:8px">
+        <button id="embCopy" class="dd-btn" type="button" style="flex:0 0 auto" data-i18n="embCopy">📋 Копировать код</button>
+        <button id="embPreview" class="dd-btn dd-ghost" type="button" style="flex:0 0 auto" data-i18n="embPreview">👁 Предпросмотр</button>
+      </div>
+      <div id="embPrev" style="margin-top:10px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- окно: настройка «железа» при первом запуске (режим записи) -->
+<div class="dd-modal" id="hwModal">
+  <div class="dd-modal-box" style="width:520px">
+    <div class="dd-modal-h"><b data-i18n="mHw">🖥️ Настройка оборудования (первый запуск)</b><button class="dd-btn dd-modalclose" data-close="hwModal" type="button">✕</button></div>
+    <div class="dd-wiz-body" style="max-height:none">
+      <div class="dd-hint" style="margin-top:0" data-i18n="hwHint">Настрой виртуальное «железо» DOSBox для этого диска. Параметры сохранятся в файле .gitdos.json в репозитории и будут применяться при каждом запуске. Позже их можно изменить в этом же файле.</div>
+      <div class="dd-formrow"><label data-i18n="hwMachineL">Видео/машина</label>
+        <select id="hwMachine">
+          <option value="svga_s3">SVGA (S3) — макс. совместимость</option>
+          <option value="vesa_nolfb">SVGA VESA (no LFB)</option>
+          <option value="vgaonly">VGA</option>
+          <option value="ega">EGA</option>
+          <option value="cga">CGA</option>
+          <option value="hercules">Hercules (моно)</option>
+          <option value="tandy">Tandy</option>
+          <option value="pcjr">PCjr</option>
+        </select></div>
+      <div class="dd-formrow"><label data-i18n="hwMemL">Память (memsize)</label>
+        <select id="hwMem"><option value="4">4 МБ</option><option value="8">8 МБ</option><option value="16">16 МБ</option><option value="32">32 МБ</option><option value="63">63 МБ</option></select></div>
+      <div class="dd-formrow"><label data-i18n="hwCoreL">Ядро CPU (core)</label>
+        <select id="hwCore"><option value="auto">auto</option><option value="normal">normal</option><option value="dynamic">dynamic (быстрее)</option><option value="simple">simple</option></select></div>
+      <div class="dd-formrow"><label data-i18n="hwCpuL">Тип CPU</label>
+        <select id="hwCpu"><option value="auto">Авто</option><option value="386">386</option><option value="486_slow">486</option><option value="pentium_slow">Pentium</option></select></div>
+      <div class="dd-formrow"><label data-i18n="hwCyclesL">Скорость (cycles)</label>
+        <select id="hwCycles"><option value="auto">auto</option><option value="max">max</option><option value="5000">5000</option><option value="10000">10000</option><option value="20000">20000</option><option value="50000">50000</option></select></div>
+      <div class="dd-formrow"><label data-i18n="hwSbL">Звуковая карта</label>
+        <select id="hwSb"><option value="sb16">Sound Blaster 16</option><option value="sbpro2">Sound Blaster Pro 2</option><option value="sbpro1">Sound Blaster Pro</option><option value="sb2">Sound Blaster 2.0</option><option value="sb1">Sound Blaster 1.0</option><option value="gb">Game Blaster</option><option value="none" data-i18n="hwSbNone">нет</option></select></div>
+      <div class="dd-formrow"><label data-i18n="hwSpkL">PC-спикер</label><input id="hwSpk" type="checkbox" checked style="width:auto"></div>
+      <div class="dd-row" style="margin-top:12px;justify-content:flex-end;gap:8px">
+        <button id="hwSkipBtn" class="dd-btn dd-ghost" type="button" data-i18n="hwSkip">Пропустить</button>
+        <button id="hwSaveBtn" class="dd-btn" type="button" data-i18n="hwSave">💾 Сохранить в репозиторий и запустить</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- окно: редактор системных файлов AUTOEXEC.BAT / CONFIG.SYS -->
 <div class="dd-modal" id="sysEditModal">
   <div class="dd-modal-box" style="width:620px">
@@ -818,6 +907,23 @@
         <h3>Поделиться диском (ссылка + QR)</h3>
         <p>Окно «🔗 Поделиться» делает ссылку вида <code>…/?repo=owner/name</code> (плюс <code>&amp;branch=</code>, <code>&amp;path=</code> при необходимости) и QR-код к ней (библиотека <code>qrcode-generator</code>, MIT, локально в <code>vendor/qrcode.js</code>). Кто откроет ссылку — у того GitDOS сам подключит и смонтирует этот диск (<code>applyShareLink</code> при загрузке создаёт/выбирает профиль и вызывает «Пуск»). <b>Только публичные репозитории и только чтение: токен в ссылку не кладётся.</b> Можно добавить <code>&amp;run=ИГРА.EXE</code> — тогда сразу запустится программа.</p>
 
+        <h3>Встраивание на свой сайт (Embed API)</h3>
+        <p>GitDOS можно вставить на любую страницу через <code>embed.js</code> — терминал грузится в <code>&lt;iframe&gt;</code>, репозиторий и (опц.) токен задаёшь из кода:</p>
+        <p><code>&lt;div id="dos"&gt;&lt;/div&gt;<br>
+        &lt;script src="https://&lt;хост&gt;/embed.js"&gt;&lt;/script&gt;<br>
+        &lt;script&gt;GitDOS.mount('#dos', { repo:'owner/name', run:'GAME.EXE' });&lt;/script&gt;</code></p>
+        <p>Проще всего — окно <b>«🧩 Код для сайта»</b> (слева в меню): задаёшь репозиторий, размер, автозапуск → получаешь готовый код (вариант SDK или «сырой» iframe), кнопки «Копировать» и «Предпросмотр». Токен подставляется только по явной галочке (с предупреждением).</p>
+        <p>Через API доступны <b>все настройки, что и в интерфейсе</b>. Опции <code>mount</code>: <code>repo</code> (обяз.), <code>token</code>, <code>branch</code>, <code>path</code>, <code>run</code> (автозапуск), <code>disks</code> (доп. диски D:/E:… — массив <code>{letter,repo,branch,path,token}</code>), <code>cmds</code> (массив DOS-команд после старта), <code>exclude</code> (не монтировать папки), <code>cycles</code> (скорость CPU), <code>muted</code> (звук), <code>lang</code> (<code>ru</code>/<code>en</code>), <code>net</code> (IPX-мультиплеер <code>{on,room,backend}</code>), <code>ai</code> (ассистент Claude — <code>{key,model}</code>), <code>programs</code>/<code>programsToken</code> (каталог Store), <code>src</code>, <code>width</code>/<code>height</code>, <code>bar:false</code> (только экран), <code>allowOrigin</code>.</p>
+        <p><b>Командные файлы в embed.</b> Мостовые команды GitDOS (<code>GITDOS SAVE/COMMIT/PULL</code>, <code>INSTALL</code>, <code>AI</code>, <code>UPLOADS</code>…) и обычные <code>.BAT</code> работают и при запуске по API — <code>mount()</code> грузит <code>C:\COMMANDS</code>, а сторож команд запускается при готовности диска. Их можно и дёргать из кода хоста: <code>handle.type('GITDOS SAVE')</code>, <code>handle.type('AI привет')</code>, <code>handle.run('GAME.EXE')</code>. Команды с записью (SAVE/COMMIT) требуют токен, <code>AI</code> — ключ ассистента; <code>UPLOADS</code>/<code>AIFILE</code> открывают окно выбора файла поверх терминала.</p>
+        <p><b>Публикация в Store по API.</b> Можно выложить программу в GitDOS Store <b>своего</b> каталога прямо из кода: сначала укажи каталог и токен — <code>configure({programs:'owner/repo', programsToken:'…'})</code>, затем <code>handle.publishProgram({section:'games', sub:'arcade', id:'mygame', name:'My Game', version:'1.0', run:'GAME.EXE', files:[{name:'GAME.EXE', base64:'…'}, {name:'READ.ME', text:'hi'}]})</code>. Пишет <code>install.json</code> + файлы по пути <code>&lt;раздел&gt;/&lt;подраздел&gt;/&lt;id&gt;/</code> через GitHub API. <code>section</code>: <code>''</code>(Программы)/<code>games</code>/<code>drivers</code>; файлы — <code>text</code> (текст) или <code>base64</code> (бинарные). 🔴 Нужен токен каталога с правом записи (секрет — только доверенная страница).</p>
+        <p><b>Ассистент Claude в embed.</b> Команда <code>AI</code> в DOS работает и при запуске по API — нужно лишь передать ключ: <code>mount('#el',{repo, ai:{key:'sk-ant-…', model:'…'}})</code> или из кода <code>handle.setAi({key:'…'})</code>. 🔴 Ключ Claude — <b>секрет</b>: он окажется в JS хост-страницы и виден её посетителям. Встраивай с ключом ассистента <b>только на закрытой/доверенной странице</b>; на публичных — лучше через свой прокси, а не прямым ключом. В <code>getConfig()</code> ключ маскируется.</p>
+        <p>Handle: <code>.on('ready'|'mounted'|'configured'|'error', cb)</code>, <code>.reconfigure({…})</code>, а также живое управление (возвращают Promise): <code>.run(prog)</code>, <code>.type(cmd)</code>, <code>.setLang(l)</code>, <code>.setCycles(v)</code>, <code>.setMute(b)</code>, <code>.setNet(n)</code>, <code>.getConfig()</code>, <code>.stop()</code>, <code>.call(method,…args)</code> (вызов любого метода <code>window.GitDOS</code> внутри iframe), <code>.destroy()</code>. Живой пример — <code>embed-demo.html</code>.</p>
+        <p>Внутри iframe работает флаг <code>?embed=1</code> (прячет весь хром, остаётся DOS-экран). <b>Репозиторий и токен передаются только через <code>postMessage</code></b> — в URL/историю не попадают (для «сырого» iframe без SDK допустим и публичный <code>?repo=</code>, как в «Поделиться»). Для same-page-сценария тот же API есть напрямую: <code>window.GitDOS.configure({repo,token,run,disks,cycles,…})</code>.</p>
+        <p>🔴 <b>Безопасность:</b> токен даёт доступ к репозиторию и остаётся в JS страницы-хоста — встраивай с токеном только на доверенной/закрытой странице, бери fine-grained токен с минимумом прав. Для публичных данных токен не нужен. Токен из embed <b>не сохраняется</b> в браузере (localStorage).</p>
+
+        <h3>Настройка «железа» при первом запуске (режим записи)</h3>
+        <p>Когда диск монтируется <b>с токеном</b> (режим записи) и в <code>.gitdos.json</code> ещё нет раздела <code>hardware</code>, при первом запуске открывается окно <b>«Настройка оборудования»</b>: видео/машина (<code>machine</code>), память (<code>memsize</code>), ядро и тип CPU (<code>core</code>/<code>cputype</code>), скорость (<code>cycles</code>), звуковая карта (<code>sbtype</code>), PC-спикер. Выбор <b>сохраняется локально</b> (в настройках браузера, по репозиторию) и, если есть токен, <b>ещё и в <code>.gitdos.json</code> репозитория</b> (раздел <code>hardware</code>) — тогда едет вместе с диском на все устройства. Применяется при каждом запуске; окно повторно не появляется. Кнопка «Пропустить» стартует с параметрами по умолчанию, ничего не сохраняя. Диск только для чтения (без токена) окно не показывает. Значения берутся из белого списка (защита от инъекций в <code>dosbox.conf</code>). Через Embed API железо можно задать сразу: <code>GitDOS.mount('#el',{repo,token,hardware:{machine:'svga_s3',memsize:16,sbtype:'sb16'}})</code>, а также <b>сохранить</b> из кода: <code>handle.saveHardware({memsize:32,sbtype:'sbpro2'})</code> (локально + в репозиторий при токене) и прочитать <code>handle.getHardware()</code>. Применение — при следующем <code>handle.remount()</code>.</p>
+
         <h3>Манифест .gitdos.json (запуск без настройки)</h3>
         <p>Необязательный файл <code>.gitdos.json</code> в корне диска C: настраивает запуск. Поля: <code>name</code> — имя диска (идёт в заголовок вкладки), <code>run</code> — что запустить после загрузки (путь от корня C:, напр. <code>GAMES\\DOOM\\DOOM.EXE</code>), <code>cycles</code> — скорость CPU DOSBox (<code>auto</code> | <code>max</code> | число | <code>fixed 3000</code>). GitDOS читает манифест при монтировании и добавляет запуск прямо в autoexec — <b>DOSBox сам</b> делает <code>CD</code> и запускает программу (без автонабивки клавиш). Кнопка «📦 Создать шаблон .gitdos.json» в окне дисков создаёт заготовку. Нет файла/битый JSON — игнорируется. <code>cycles</code> и <code>run</code> валидируются (защита от инъекций в конфиг).</p>
 
@@ -962,7 +1068,8 @@ function saveCfg(){ localStorage.setItem('dosdisk_cfg', JSON.stringify(cfg)); }
 const I18N = {
   ru: {
     tagline:'Твой DOS живёт в репозитории', navDisks:'⚙️ Общие настройки', navUpload:'📤 Загрузка файлов',
-    navLauncher:'🖥️ Лаунчер', navStore:'🏪 GitDOS Store', mStore:'🏪 GitDOS Store', storeHint:'Каталог программ, игр и драйверов. Зайди в раздел и нажми «Установить» — в DOS-терминале выполнится команда INSTALL.', storeInstall:'Установить', storeInstalled:'Установлено', storeEmpty:'Каталог пуст или недоступен', storeLoading:'Загружаю каталог…', storeNeedDisk:'Сначала запусти диск, чтобы устанавливать программы', phStoreSearch:'🔎 поиск по программам…', btnStorePublish:'📤 Опубликовать', publishHint:'Опубликовать свою программу в каталог (твой репозиторий). Нужен «Токен каталога» в «🧩 Каталог программ». Файлы и манифест install.json запишутся через GitHub API.', pubSection:'Раздел', pubSecPrograms:'Программы', pubSecGames:'Игры', pubSecDrivers:'Драйверы', pubSub:'Подраздел (необяз.)', pubId:'id (англ., одно слово)', pubName:'Название', pubVersion:'Версия', pubRun:'Чем запускать (необяз.)', pubDesc:'Описание', pubFiles:'Файлы программы (.EXE/.COM/…)', btnPubSubmit:'📤 Опубликовать', btnPubCancel:'Отмена', storeMove:'Переместить в другой раздел', navShare:'🔗 Поделиться', navHistory:'🕓 История диска', navKb:'📖 База знаний', navAbout:'ℹ️ О программе',
+    navLauncher:'🖥️ Лаунчер', navStore:'🏪 GitDOS Store', mStore:'🏪 GitDOS Store', storeHint:'Каталог программ, игр и драйверов. Зайди в раздел и нажми «Установить» — в DOS-терминале выполнится команда INSTALL.', storeInstall:'Установить', storeInstalled:'Установлено', storeEmpty:'Каталог пуст или недоступен', storeLoading:'Загружаю каталог…', storeNeedDisk:'Сначала запусти диск, чтобы устанавливать программы', phStoreSearch:'🔎 поиск по программам…', btnStorePublish:'📤 Опубликовать', publishHint:'Опубликовать свою программу в каталог (твой репозиторий). Нужен «Токен каталога» в «🧩 Каталог программ». Файлы и манифест install.json запишутся через GitHub API.', pubSection:'Раздел', pubSecPrograms:'Программы', pubSecGames:'Игры', pubSecDrivers:'Драйверы', pubSub:'Подраздел (необяз.)', pubId:'id (англ., одно слово)', pubName:'Название', pubVersion:'Версия', pubRun:'Чем запускать (необяз.)', pubDesc:'Описание', pubFiles:'Файлы программы (.EXE/.COM/…)', btnPubSubmit:'📤 Опубликовать', btnPubCancel:'Отмена', storeMove:'Переместить в другой раздел', navShare:'🔗 Поделиться', navEmbed:'🧩 Код для сайта', navHistory:'🕓 История диска', navKb:'📖 База знаний', navAbout:'ℹ️ О программе',
+    mEmbed:'🧩 Код для вставки на сайт', embHint:'Задай параметры — получишь готовый код. Вставь его на свою страницу, и GitDOS загрузится в рамке. Публичный репозиторий токена не требует.', embRepo:'Репозиторий (owner/name)', embBranch:'Ветка', embRun:'Автозапуск (необяз.)', embSize:'Размер (Ш×В)', embHost:'Адрес GitDOS', embBar:'Показывать кнопки/строку', embTok:'Вставить токен (приватный)', embTokWarn:'🔴 Токен попадёт в код страницы и будет виден её посетителям. Вставляй с токеном только на закрытой/доверенной странице. Для публичного репозитория токен не нужен.', embVar:'Вариант', embVarSdl:'SDK (рекомендуется)', embVarIframe:'iframe (без JS, только публичный)', embCopy:'📋 Копировать код', embPreview:'👁 Предпросмотр',
     mShare:'🔗 Поделиться диском', shareHint:'Ссылка открывает GitDOS сразу с этим диском (репозиторий C:). Подходит для публичных репозиториев — токен в ссылку НЕ попадает.', btnShareCopy:'Копировать',
     mLauncher:'🖥️ Лаунчер', launchHint:'Программы (.EXE/.COM/.BAT) из репозитория C:. Клик по «▶ Запустить» монтирует диск и сразу стартует выбранную программу.', btnLaunchLoad:'Обновить список',
     mHistory:'🕓 История диска C:', histHint:'Диск C: — это git-репозиторий, поэтому видна вся история. Можно смонтировать прошлую версию диска (только чтение) или восстановить отдельный файл.',
@@ -990,6 +1097,7 @@ const I18N = {
     stepSysEdit:'Загрузочные файлы', hintSysEdit:'Правка AUTOEXEC.BAT и CONFIG.SYS прямо в браузере — что выполняется при старте диска и драйверы DOS.', btnSysEdit2:'⚙️ Редактировать AUTOEXEC.BAT / CONFIG.SYS',
     mSysEdit:'⚙️ AUTOEXEC.BAT и CONFIG.SYS', sysHint:'Загрузочные файлы диска C:. Изменения сохраняются в репозиторий (нужен токен) или на запущенный диск. Применяются при следующем «Пуск».', btnSysReload:'↻ Перечитать', btnSysSave:'💾 Сохранить',
     mScreen:'🖥️ Экран и DOSBox', lblCycles:'Скорость CPU (cycles)', hintCycles:'Применяется при следующем «Пуск». Если в .gitdos.json задан свой cycles — он важнее.', btnMute:'🔊 Звук: вкл',
+    mHw:'🖥️ Настройка оборудования (первый запуск)', hwHint:'Настрой виртуальное «железо» DOSBox для этого диска. Параметры сохранятся в файле .gitdos.json в репозитории и будут применяться при каждом запуске. Позже их можно изменить в этом же файле.', hwMachineL:'Видео/машина', hwMemL:'Память (memsize)', hwCoreL:'Ядро CPU (core)', hwCpuL:'Тип CPU', hwCyclesL:'Скорость (cycles)', hwSbL:'Звуковая карта', hwSbNone:'нет', hwSpkL:'PC-спикер', hwSkip:'Пропустить', hwSave:'💾 Сохранить в репозиторий и запустить',
     stepBackup:'Экспорт / импорт диска', hintBackup:'Скачать весь диск C: одним .zip (резервная копия) или импортировать .zip — он распакуется в корень диска.', btnExportZip:'⬇ Скачать диск (.zip)', btnImportZip:'⬆ Импорт .zip в диск',
     hintExtra:'Каждый доп. репозиторий доступен в DOS как папка C:\\DISKS\\<буква> (напр. C:\\DISKS\\D). Изменения сохраняются в свой репозиторий.',
     lblLetter:'Буква', btnAddDisk:'Добавить репозиторий',
@@ -1008,6 +1116,7 @@ const I18N = {
     tagline:'your DOS lives in a repo', navDisks:'⚙️ General settings', navUpload:'📤 Upload files',
     navLauncher:'🖥️ Launcher', mLauncher:'🖥️ Launcher', launchHint:'Programs (.EXE/.COM/.BAT) from repository C:. Click “▶ Run” to mount the disk and start the selected program right away.', btnLaunchLoad:'Refresh list', navStore:'🏪 GitDOS Store', mStore:'🏪 GitDOS Store', storeHint:'Catalog of programs, games and drivers. Open a section and click “Install” — the INSTALL command runs in the DOS terminal.', storeInstall:'Install', storeInstalled:'Installed', storeEmpty:'Catalog is empty or unavailable', storeLoading:'Loading catalog…', storeNeedDisk:'Start the disk first to install programs', phStoreSearch:'🔎 search programs…', btnStorePublish:'📤 Publish', publishHint:'Publish your own program to the catalog (your repo). Needs the “Catalog token” in “🧩 Program catalog”. Files and the install.json manifest are written via the GitHub API.', pubSection:'Section', pubSecPrograms:'Programs', pubSecGames:'Games', pubSecDrivers:'Drivers', pubSub:'Subsection (optional)', pubId:'id (latin, one word)', pubName:'Name', pubVersion:'Version', pubRun:'Run command (optional)', pubDesc:'Description', pubFiles:'Program files (.EXE/.COM/…)', btnPubSubmit:'📤 Publish', btnPubCancel:'Cancel', storeMove:'Move to another section',
     navShare:'🔗 Share', mShare:'🔗 Share disk', shareHint:'The link opens GitDOS straight to this disk (repository C:). For public repositories — the token is NOT included in the link.', btnShareCopy:'Copy',
+    navEmbed:'🧩 Embed code', mEmbed:'🧩 Embed code for your site', embHint:'Set the options — get ready-to-paste code. Put it on your page and GitDOS loads in a frame. A public repository needs no token.', embRepo:'Repository (owner/name)', embBranch:'Branch', embRun:'Autostart (optional)', embSize:'Size (W×H)', embHost:'GitDOS address', embBar:'Show buttons/command line', embTok:'Include token (private)', embTokWarn:'🔴 The token will be in your page code, visible to its visitors. Embed with a token only on a private/trusted page. A public repository needs no token.', embVar:'Variant', embVarSdl:'SDK (recommended)', embVarIframe:'iframe (no JS, public only)', embCopy:'📋 Copy code', embPreview:'👁 Preview',
     navHistory:'🕓 Disk history', mHistory:'🕓 Disk C: history', histHint:'Disk C: is a git repository, so the full history is available. You can mount a past version of the disk (read-only) or restore an individual file.',
     histSnaps:'Whole-disk snapshots', btnHistLoad:'Load history', histFileH:'Single-file history', histFileLbl:'File path (from C: root)', btnHistFile:'Show file history',
     navKb:'📖 Knowledge base', navAbout:'ℹ️ About',
@@ -1034,6 +1143,7 @@ const I18N = {
     stepSysEdit:'Boot files', hintSysEdit:'Edit AUTOEXEC.BAT and CONFIG.SYS in the browser — what runs at disk startup and DOS drivers.', btnSysEdit2:'⚙️ Edit AUTOEXEC.BAT / CONFIG.SYS',
     mSysEdit:'⚙️ AUTOEXEC.BAT & CONFIG.SYS', sysHint:'Boot files of disk C:. Changes are saved to the repository (token needed) or to the running disk. Applied on the next Run.', btnSysReload:'↻ Reload', btnSysSave:'💾 Save',
     mScreen:'🖥️ Screen & DOSBox', lblCycles:'CPU speed (cycles)', hintCycles:'Applied on the next Run. If .gitdos.json sets its own cycles, that wins.', btnMute:'🔊 Sound: on',
+    mHw:'🖥️ Hardware setup (first run)', hwHint:'Configure the virtual DOSBox hardware for this disk. Settings are saved to .gitdos.json in the repository and applied on every launch. You can change them later in that file.', hwMachineL:'Video/machine', hwMemL:'Memory (memsize)', hwCoreL:'CPU core', hwCpuL:'CPU type', hwCyclesL:'Speed (cycles)', hwSbL:'Sound card', hwSbNone:'none', hwSpkL:'PC speaker', hwSkip:'Skip', hwSave:'💾 Save to repository and run',
     stepBackup:'Export / import disk', hintBackup:'Download the whole C: disk as one .zip (backup) or import a .zip — it unpacks into the disk root.', btnExportZip:'⬇ Download disk (.zip)', btnImportZip:'⬆ Import .zip into disk',
     hintExtra:'Each extra repository is available in DOS as folder C:\\DISKS\\<letter> (e.g. C:\\DISKS\\D). Changes are saved to its own repository.',
     lblLetter:'Letter', btnAddDisk:'Add repository',
@@ -2437,6 +2547,7 @@ async function cmdTick(){ if(cmdBusy||syncing||!ci) return; cmdBusy=true;
 // прочитать маркер-файл (fsReadFile, с запасным чтением через persist)
 async function readMarker(name){ try{ return new TextDecoder().decode(await ci.fsReadFile(name)); }
   catch(_){ try{ const b=await ci.persist(false); const e=readZipEntries(b).find(x=>x.name===name); if(e) return new TextDecoder().decode(await zipExtract(b,e)); }catch(__){} return ''; } }
+
 // применить настройку репозитория, пришедшую из DOS (REPO/BRANCH/PATH); токен — только в вебе
 function applyDosConfig(line){
   const t=String(line||'').replace(/[\r\n]/g,'').trim(); const sp=t.indexOf(' ');
@@ -2484,12 +2595,43 @@ function dosRunLines(run){ let p=String(run||'').trim().replace(/\//g,'\\').repl
   if(!p || /[\r\n;]/.test(p)) return '';
   const i=p.lastIndexOf('\\'); const dir=i>=0?p.slice(0,i):''; const exe=i>=0?p.slice(i+1):p;
   return (dir?'@CD \\'+dir+'\n':'')+'@'+exe+'\n'; }
-// единственный рабочий вариант js-dos: монтируем корень bundle как C: и выполняем AUTOEXEC.BAT
-function makeConf(m){ const cy=safeCycles(m&&m.cycles);
-  let s='[sdl]\nautolock=false\n[cpu]\ncycles='+cy+'\n[autoexec]\n'+
+// валидация параметров «железа» (только из белого списка -> защита от инъекций в dosbox.conf)
+function safeCore(v){ return ['auto','normal','dynamic','simple'].includes(String(v))?String(v):''; }
+function safeCputype(v){ return ['auto','386','386_slow','486_slow','pentium_slow'].includes(String(v))?String(v):''; }
+function safeMachine(v){ return ['svga_s3','vesa_nolfb','vgaonly','ega','cga','hercules','tandy','pcjr'].includes(String(v))?String(v):''; }
+function safeMem(v){ v=parseInt(v,10); return (v>=1&&v<=63)?v:0; }
+function safeSb(v){ return ['sb16','sbpro2','sbpro1','sb2','sb1','gb','none'].includes(String(v))?String(v):''; }
+// единственный рабочий вариант js-dos: монтируем корень bundle как C: и выполняем AUTOEXEC.BAT.
+// «Железо» (machine/memsize/core/cputype/sbtype/pcspeaker) берём из manifest.hardware (сохранено в репозитории).
+function makeConf(m){ const cy=safeCycles(m&&m.cycles); const hw=(m&&m.hardware)||{};
+  const core=safeCore(hw.core), cput=safeCputype(hw.cputype), mem=safeMem(hw.memsize),
+        mach=safeMachine(hw.machine), sb=safeSb(hw.sbtype),
+        spk=(hw.pcspeaker===false?'false':(hw.pcspeaker===true?'true':''));
+  let s='[sdl]\nautolock=false\n';
+  if(mach||mem){ s+='[dosbox]\n'; if(mach) s+='machine='+mach+'\n'; if(mem) s+='memsize='+mem+'\n'; }
+  s+='[cpu]\ncycles='+cy+'\n'; if(core) s+='core='+core+'\n'; if(cput) s+='cputype='+cput+'\n';
+  if(sb) s+='[sblaster]\nsbtype='+sb+'\n';
+  if(spk) s+='[speaker]\npcspeaker='+spk+'\n';
+  s+='[autoexec]\n'+
     '@mount c .\n@c:\n@CLS\n@TYPE GITDOS.NFO\n@TYPE GITDOS.DAT\n@CALL AUTOEXEC.BAT\n@IF EXIST C:\\COMMANDS\\SETPATH.BAT CALL C:\\COMMANDS\\SETPATH.BAT\n';
   if(m && m.run) s+=dosRunLines(m.run);
   return s; }
+// --- настройка «железа» при первом запуске (режим записи) ---
+let overrideHardware=null;   // hardware, переданное через embed/API (без интерактивной модалки)
+let hwResolver=null;         // резолвер промиса открытой модалки железа
+function promptHardware(current){ return new Promise(resolve=>{ hwResolver=resolve; const hw=current||{};
+  $('hwCore').value   = safeCore(hw.core)||'auto';
+  $('hwCpu').value    = safeCputype(hw.cputype)||'auto';
+  $('hwCycles').value = safeCycles(hw.cycles);          // auto|max|число
+  $('hwMem').value    = String(safeMem(hw.memsize)||16);
+  $('hwMachine').value= safeMachine(hw.machine)||'svga_s3';
+  $('hwSb').value     = safeSb(hw.sbtype)||'sb16';
+  $('hwSpk').checked  = hw.pcspeaker!==false;            // по умолчанию вкл
+  openModal('hwModal'); }); }
+function hwCollect(){ return { core:$('hwCore').value, cputype:$('hwCpu').value, cycles:$('hwCycles').value,
+  memsize:parseInt($('hwMem').value,10), machine:$('hwMachine').value, sbtype:$('hwSb').value, pcspeaker:$('hwSpk').checked }; }
+function hwSubmit(){ const hw=hwCollect(); const r=hwResolver; hwResolver=null; closeModal('hwModal'); if(r) r(hw); }   // резолвер снимаем ДО closeModal (иначе хук закрытия резолвит null)
+function hwSkip(){ const r=hwResolver; hwResolver=null; closeModal('hwModal'); if(r) r(null); }
 // сетевая (IPX) конфигурация для мультиплеера — opt-in
 function netConf(){ const n=cfg.net||{}; return { on:!!n.on, room:String(n.room||'').trim(), backend:String(n.backend||'wss://netherlands.dos.zone').trim() }; }
 async function boot(bundleUrl){ log('Запускаю DOSBox…');
@@ -2566,6 +2708,29 @@ async function mount(opts){ opts=opts||{}; const ref=opts.ref||null;
     if(!confM.cycles && cfg.dosbox && cfg.dosbox.cycles) confM.cycles = cfg.dosbox.cycles;  // настройка cycles из UI (манифест важнее)
     try{ document.title = (manifest&&manifest.name ? manifest.name+' — GitDOS' : 'GitDOS — '+t('tagline')); }catch(_){}
     if(confM.run) log('▶ Автозапуск: '+confM.run);
+    // ПЕРВЫЙ ЗАПУСК В РЕЖИМЕ ЗАПИСИ: есть токен и ещё нет сохранённого «железа» -> окно настройки.
+    // Сохраняем ВСЕГДА локально (cfg.hardware по репозиторию — не потеряется даже без записи в репо)
+    // и, если есть токен, дополнительно в .gitdos.json репозитория (едет вместе с диском).
+    const repoKey = (drives[0].repo.repoName && drives[0].repo.repoName()) || '';
+    cfg.hardware = cfg.hardware || {};
+    const savedHw = (manifest && manifest.hardware) || (repoKey && cfg.hardware[repoKey]) || null;
+    const writeMode = !snapshotRef && !!drives[0].repo.token();
+    if(writeMode && !savedHw && overrideHardware==null && !embedRequested()){
+      log('🖥️ Первый запуск в режиме записи — настрой «железо».');
+      const hw = await promptHardware(savedHw);
+      if(hw){ confM.hardware=hw; manifest=Object.assign(manifest||{}, {hardware:hw});
+        if(repoKey){ cfg.hardware[repoKey]=hw; saveCfg(); log('💾 Настройки железа сохранены (локально).'); }   // ВСЕГДА
+        try{ const data=enc(JSON.stringify(Object.assign({}, manifest), null, 2));
+          await drives[0].repo.write('.gitdos.json', data);
+          try{ drives[0].repo._sha['.gitdos.json']=await gitBlobSha(data); }catch(_){}
+          const idx=bundleFiles.findIndex(f=> f.path.toLowerCase()==='.gitdos.json');
+          if(idx>=0) bundleFiles[idx].data=data; else bundleFiles.push({path:'.gitdos.json', data});
+          log('💾 Настройки железа записаны и в .gitdos.json репозитория.');
+        }catch(e){ log('В .gitdos.json репозитория не записалось (нужен токен с правом repo): '+e.message,'dd-warn'); }
+      } else log('Настройка железа пропущена — запускаю с параметрами по умолчанию.');
+    }
+    if(!confM.hardware && savedHw) confM.hardware=savedHw;                            // применить сохранённое (манифест/локально)
+    if(overrideHardware!=null && !confM.hardware) confM.hardware=overrideHardware;   // hardware из embed/API
     // большие файлы из GitHub Release (по списку manifest.assets) — качаем и кладём на диск C:
     assetPaths=new Set();
     if(manifest && Array.isArray(manifest.assets) && manifest.assets.length){
@@ -2744,11 +2909,13 @@ function openModal(id){ const m=$(id); m.classList.add('dd-show');
   if(id==='settingsModal'){ const ms=$('mountSelList'); if(ms) ms.innerHTML=''; }
   if(id==='launcherModal'){ if(GitHub.ready()) launchLoad(); else $('launchList').textContent='Сначала подключи диск C: (Общие настройки).'; }
   if(id==='shareModal') renderShare();
+  if(id==='embedModal') embedModalInit();
   if(id==='sysEditModal') sysEditLoad();
   if(id==='uploadModal'){ fmPath=[]; fmRender();
     if(document.fullscreenElement){ uploadWasFs=true; try{ document.exitFullscreen(); }catch(_){} } }   // окно не видно поверх фуллскрина -> выходим, вернём после
   if(id==='historyModal'){ $('histFileList').innerHTML=''; if(GitHub.ready()) histLoadDisk(); else $('histCommits').textContent='Сначала подключи диск C: (Общие настройки).'; } }
 function closeModal(id){ $(id).classList.remove('dd-show');
+  if(id==='hwModal' && hwResolver){ const r=hwResolver; hwResolver=null; r(null); }   // закрыли крестиком -> пропуск настройки железа
   if(id==='uploadModal' && uploadWasFs){ uploadWasFs=false; reenterFs(); } }   // закрытие окна — это жест, фуллскрин вернётся надёжно
 
 // дополнительные диски
@@ -2916,6 +3083,50 @@ function renderShare(){ const url=shareUrl(); const link=$('shareLink'), qr=$('s
 async function shareCopy(){ const url=$('shareLink').value; if(!url) return;
   try{ await navigator.clipboard.writeText(url); log('🔗 Ссылка скопирована.'); }
   catch(_){ $('shareLink').select(); try{ document.execCommand('copy'); log('🔗 Ссылка скопирована.'); }catch(e){ log('Не удалось скопировать — выдели и Ctrl+C','dd-warn'); } } }
+
+// ---------- конструктор кода для вставки (Embed) ----------
+function embedDirUrl(){ return location.origin + location.pathname.replace(/[^/]*$/,''); }  // папка, где лежит текущий index.html
+function embedDefaultHost(){                                                                // куда указывать в сниппете
+  const dev=location.hostname==='localhost'||location.hostname==='127.0.0.1'||location.protocol==='file:';
+  return dev ? 'https://sementsul.github.io/GitDOS/' : embedDirUrl();                       // на localhost/file подставляем опубликованный адрес
+}
+function embFields(){ let host=($('embHost').value||'').trim()||embedDefaultHost(); if(!/\/$/.test(host)) host+='/';
+  return { host, repo:($('embRepo').value||'').trim(), branch:($('embBranch').value||'').trim(),
+    run:($('embRun').value||'').trim(), w:($('embW').value||'').trim()||'100%', h:($('embH').value||'').trim()||'480px',
+    bar:$('embBar').checked, token:($('embTok').checked ? ((cfg.github&&cfg.github.token)||'') : ''), variant:$('embVar').value }; }
+function jsStr(s){ return "'"+String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'")+"'"; }
+function renderEmbedSnippet(){ const f=embFields(); $('embTokWarn').style.display=$('embTok').checked?'':'none';
+  let out='';
+  if(f.variant==='iframe'){                                                                 // «сырой» iframe: только публичное чтение
+    const sp=new URLSearchParams(); sp.set('embed','1'); if(f.repo) sp.set('repo',f.repo);
+    if(f.branch && f.branch!=='main') sp.set('branch',f.branch); if(f.run) sp.set('run',f.run); if(!f.bar) sp.set('bar','0');
+    out='<iframe src="'+f.host+'index.html?'+sp.toString()+'"\n'
+      +'  width="'+f.w+'" height="'+String(f.h).replace('px','')+'" style="border:0" title="GitDOS"\n'
+      +'  allow="clipboard-write; fullscreen; microphone"></iframe>';
+    if(f.token) out='<!-- В iframe токен не вставляется (попал бы в URL). Для приватного репозитория используй вариант SDK. -->\n'+out;
+  } else {                                                                                  // SDK: конфиг через postMessage (токен не в URL)
+    const opts=['repo: '+jsStr(f.repo)];
+    if(f.branch && f.branch!=='main') opts.push('branch: '+jsStr(f.branch));
+    if(f.run) opts.push('run: '+jsStr(f.run));
+    if(f.token) opts.push('token: '+jsStr(f.token));
+    opts.push('height: '+jsStr(f.h)); if(f.w && f.w!=='100%') opts.push('width: '+jsStr(f.w));
+    if(!f.bar) opts.push('bar: false');
+    out='<div id="gitdos"></div>\n'
+      +'<script src="'+f.host+'embed.js"><\/script>\n'
+      +'<script>\n  GitDOS.mount(\'#gitdos\', { '+opts.join(', ')+' });\n<\/script>';
+  }
+  $('embOut').value=out; }
+async function embedCopy(){ const v=$('embOut').value; if(!v) return;
+  try{ await navigator.clipboard.writeText(v); log('🧩 Код для вставки скопирован.'); }
+  catch(_){ $('embOut').select(); try{ document.execCommand('copy'); log('🧩 Код скопирован.'); }catch(e){ log('Выдели и Ctrl+C','dd-warn'); } } }
+function embedPreview(){ const f=embFields(); if(!/^[^/]+\/[^/]+$/.test(f.repo)){ log('Укажи репозиторий (owner/name) для предпросмотра','dd-warn'); return; }
+  const sp=new URLSearchParams(); sp.set('embed','1'); sp.set('repo',f.repo);               // предпросмотр всегда публичный (без токена) и из ТЕКУЩЕЙ сборки
+  if(f.branch && f.branch!=='main') sp.set('branch',f.branch); if(f.run) sp.set('run',f.run); if(!f.bar) sp.set('bar','0');
+  $('embPrev').innerHTML='<iframe src="'+embedDirUrl()+'index.html?'+sp.toString()+'" style="width:100%;height:360px;border:2px solid #888;background:#000" title="preview" allow="clipboard-write; fullscreen; microphone"></iframe>'; }
+function embedModalInit(){ if(!$('embRepo').value){ $('embRepo').value=(cfg.github&&cfg.github.repo)||''; }
+  if(!$('embBranch').value){ $('embBranch').value=(cfg.github&&cfg.github.branch)||''; }
+  if(!$('embHost').value){ $('embHost').placeholder=embedDefaultHost(); }
+  renderEmbedSnippet(); }
 // при загрузке: ?repo=owner/name -> подключить диск и сразу смонтировать (только публичное чтение)
 function applyShareLink(){
   const sp=new URLSearchParams(location.search); const repo=sp.get('repo');
@@ -2927,6 +3138,135 @@ function applyShareLink(){
   applyProfile(prof);
   log('🔗 Открыто по ссылке: '+repo+(run?(' → '+run):'')+' (публичное чтение)');
   return run ? {run} : true; }
+
+// ---------- Embed API: встраивание GitDOS на сторонний сайт (iframe + postMessage) ----------
+// Родитель шлёт {source:'gitdos-host', type:'gitdos:config', config:{repo,token,branch,path,run}}.
+// Мы отвечаем событиями {source:'gitdos', type:'gitdos:ready|mounted|error', ...}.
+// Токен приходит ТОЛЬКО через postMessage (в URL его не кладём) и в localStorage НЕ сохраняется.
+function inIframe(){ try{ return window.self!==window.top; }catch(_){ return true; } }
+function embedRequested(){ const sp=new URLSearchParams(location.search); const e=sp.get('embed'); return e==='1'||e==='true'; }
+let embedParentOrigin='*';   // куда отвечать родителю (уточним из первого валидного сообщения)
+function embedPost(type, data){ if(!inIframe()) return;
+  try{ window.parent.postMessage(Object.assign({source:'gitdos', type}, data||{}), embedParentOrigin); }catch(_){} }
+// применить ПОЛНЫЙ конфиг проекта из embed/API (что не передано — не трогаем) и смонтировать.
+// Поддержаны все настройки UI: диск C:, доп. диски D:/E:…, скорость CPU, звук, язык,
+// сеть IPX, каталог программ, выборочное монтирование, автозапуск и авто-команды DOS.
+async function embedConfigure(c){ c=c||{};
+  const repo=(c.repo||'').trim();
+  if(repo && !/^[^/]+\/[^/]+$/.test(repo)){ embedPost('gitdos:error',{error:'нужен repo вида owner/name'}); return false; }
+  if(repo){ cfg.github={ repo, branch:(c.branch||'main'), path:(c.path||''), token:(c.token||'') };  // только в памяти, без saveCfg
+    if(Array.isArray(c.exclude)) cfg.github.exclude=c.exclude; }                                       // выборочное монтирование C:
+  if(Array.isArray(c.disks)) cfg.disks=c.disks.map(d=>({ letter:d.letter, repo:d.repo, branch:d.branch||'main',
+    path:d.path||'', token:d.token||'', exclude:Array.isArray(d.exclude)?d.exclude:undefined }));       // доп. диски -> C:\DISKS\<буква>
+  cfg.dosbox=cfg.dosbox||{};
+  if(c.cycles!=null) cfg.dosbox.cycles=c.cycles;                                                        // скорость CPU DOSBox
+  if(c.muted!=null) cfg.dosbox.muted=!!c.muted;                                                         // звук
+  if(c.net && typeof c.net==='object') cfg.net=Object.assign({}, cfg.net, c.net);                       // сеть IPX (мультиплеер)
+  if(c.programs!=null) cfg.programs=c.programs;                                                          // каталог программ (Store)
+  if(c.programsToken!=null) cfg.programsToken=c.programsToken;
+  if(c.hardware && typeof c.hardware==='object') overrideHardware=c.hardware;                            // «железо» напрямую (без модалки)
+  if(c.ai && typeof c.ai==='object') cfg.ai=Object.assign({}, cfg.ai, c.ai);                             // 🔴 ассистент Claude: ключ/модель (секрет!)
+  if(c.lang){ try{ setLang(c.lang); }catch(_){ cfg.lang=c.lang; } }                                     // язык интерфейса
+  if(c.settings && typeof c.settings==='object'){ try{ Object.assign(cfg, c.settings); }catch(_){} }    // произвольные доп. ключи cfg
+  try{ if(typeof applyScreenPrefs==='function') applyScreenPrefs(); }catch(_){}
+  if(!cfg.github || !/^[^/]+\/[^/]+$/.test((cfg.github||{}).repo||'')){                                 // нет диска C: — только применили настройки
+    embedPost('gitdos:configured',{}); return true; }
+  try{ document.title=cfg.github.repo+' — GitDOS'; }catch(_){}
+  log('🔌 Embed: подключаю '+cfg.github.repo+(cfg.github.token?' (с токеном)':' (публичное чтение)'));
+  if(typeof Dos!=='function'){ embedPost('gitdos:error',{error:'js-dos не загружен'}); return false; }
+  if(Array.isArray(c.cmds) && c.cmds.length){ try{ pendingCmds.push(...c.cmds.map(String)); }catch(_){} } // авто-команды DOS после старта
+  try{ await mount(c.run?{run:c.run}:{}); embedPost('gitdos:mounted',{repo:cfg.github.repo}); return true; }
+  catch(e){ embedPost('gitdos:error',{error:e.message}); return false; }
+}
+function embedClone(v){ if(v==null||typeof v!=='object') return v; try{ return JSON.parse(JSON.stringify(v)); }catch(_){ return null; } }
+function initEmbed(){
+  const allow=new URLSearchParams(location.search).get('origin')||'';   // опц. allowlist источника сообщений
+  window.addEventListener('message', ev=>{ const d=ev.data;
+    if(!d || d.source!=='gitdos-host') return;                          // принимаем только команды от хоста
+    if(allow && ev.origin!==allow){ embedPost('gitdos:error',{error:'origin не разрешён: '+ev.origin}); return; }
+    if(embedParentOrigin==='*' && ev.origin && ev.origin!=='null') embedParentOrigin=ev.origin;
+    if(d.type==='gitdos:config'){ embedConfigure(d.config||d); return; }
+    if(d.type==='gitdos:call'){                                          // RPC: вызвать любой метод window.GitDOS
+      const fn=window.GitDOS && window.GitDOS[d.method];
+      if(typeof fn!=='function'){ embedPost('gitdos:result',{id:d.id, ok:false, error:'нет метода: '+d.method}); return; }
+      Promise.resolve().then(()=>fn.apply(window.GitDOS, d.args||[]))
+        .then(v=>embedPost('gitdos:result',{id:d.id, ok:true, value:embedClone(v)}))
+        .catch(e=>embedPost('gitdos:result',{id:d.id, ok:false, error:String((e&&e.message)||e)}));
+      return; }
+  });
+  embedPost('gitdos:ready',{ build:(function(){ try{ return buildNo(); }catch(_){ return ''; } })() });  // «готов принять конфиг»
+}
+// программный API (работает и внутри iframe через RPC, и при прямом подключении embed.js на страницу).
+// Даёт те же возможности, что интерфейс: конфиг, запуск, ввод команд, язык, скорость, звук, сеть.
+// сохранить настройки «железа» через API: локально (cfg по репозиторию) + в .gitdos.json при токене.
+// hw: {machine,memsize,core,cputype,cycles,sbtype,pcspeaker} — значения из белого списка.
+// Применяется при следующем (пере)монтировании; для немедленного применения вызови GitDOS.remount().
+async function saveHardwareApi(hw){ hw=hw||{}; const clean={};
+  if(safeMachine(hw.machine)) clean.machine=safeMachine(hw.machine);
+  if(safeMem(hw.memsize)) clean.memsize=safeMem(hw.memsize);
+  if(safeCore(hw.core)) clean.core=safeCore(hw.core);
+  if(safeCputype(hw.cputype)) clean.cputype=safeCputype(hw.cputype);
+  if(hw.cycles!=null) clean.cycles=safeCycles(hw.cycles);
+  if(safeSb(hw.sbtype)) clean.sbtype=safeSb(hw.sbtype);
+  if(hw.pcspeaker!=null) clean.pcspeaker=!!hw.pcspeaker;
+  const repo=(cfg.github&&cfg.github.repo)||'';
+  overrideHardware=clean;                                               // применится при следующем монтировании
+  if(repo){ cfg.hardware=cfg.hardware||{}; cfg.hardware[repo]=clean; saveCfg(); }   // локально — всегда
+  let savedRepo=false;
+  if(repo && GitHub.token()){                                           // в репозиторий — если есть токен
+    try{ const m=Object.assign({}, manifest||{}, {hardware:clean}); const data=enc(JSON.stringify(m, null, 2));
+      await GitHub.write('.gitdos.json', data); try{ GitHub._sha['.gitdos.json']=await gitBlobSha(data); }catch(_){}
+      manifest=m; savedRepo=true;
+    }catch(e){ log('API saveHardware: в репозиторий не записалось: '+e.message,'dd-warn'); }
+  }
+  log('🖥️ API: настройки железа сохранены'+(savedRepo?' (локально + репозиторий)':' (локально)'));
+  return { ok:true, hardware:clean, savedLocal:!!repo, savedRepo }; }
+// опубликовать программу в GitDOS Store своего каталога (cfg.programs + cfg.programsToken).
+// spec: { section:'games'|'drivers'|'', sub, id(обяз.), name, version, desc, run,
+//         files:[{name, text}|{name, base64}] }. Пишет install.json + файлы через GitHub API.
+async function publishProgramApi(spec){ spec=spec||{};
+  if(!PROGRAMS_REPO.ready()) throw new Error('каталог не задан: configure({programs:"owner/repo[/подпапка]"})');
+  if(!PROGRAMS_REPO.token()) throw new Error('нужен токен каталога: configure({programsToken:"..."})');
+  const section=(spec.section==='games'||spec.section==='drivers')?spec.section:'';   // '' = Программы
+  const sub=String(spec.sub||'').replace(/[^A-Za-z0-9_-]/g,'').toLowerCase();
+  const id=String(spec.id||'').replace(/[^A-Za-z0-9_-]/g,'').toLowerCase();
+  if(!id) throw new Error('нужен id (латиница/цифры)');
+  const files=Array.isArray(spec.files)?spec.files:[];
+  if(!files.length) throw new Error('нужны файлы программы (files:[{name,text|base64}])');
+  const name=String(spec.name||id);
+  const dir=id.toUpperCase().replace(/[^A-Z0-9_]/g,'').slice(0,8)||'PROG';
+  const manifest={ name, id, dir };
+  if(spec.version) manifest.version=String(spec.version);
+  if(spec.desc) manifest.desc=String(spec.desc);
+  if(spec.run) manifest.run=String(spec.run);
+  const base = section + (sub?('/'+sub):'') + '/' + id;
+  PROGRAMS_REPO._sha={};
+  await PROGRAMS_REPO.write(base+'/install.json', enc(JSON.stringify(manifest,null,2)));
+  let n=0; for(const f of files){ const fn=String((f&&f.name)||('file'+(n+1))).replace(/[^\w.\-]/g,'_');
+    const buf = (f&&f.base64!=null) ? unb64(f.base64) : enc(String((f&&(f.text!=null?f.text:f.data))||''));
+    await PROGRAMS_REPO.write(base+'/'+fn, buf); n++; }
+  PROGRAMS_REPO._tcache=null;
+  log('🏪 API: опубликовано в каталог — '+base+' ('+n+' файл(ов))');
+  return { ok:true, path:base, files:n }; }
+window.GitDOS=Object.assign(window.GitDOS||{}, {
+  configure:embedConfigure,                                              // полный конфиг + монтирование
+  boot:()=>mount({}), remount:()=>mount({}),
+  publishProgram:publishProgramApi,                                      // опубликовать программу в Store своего каталога
+  saveHardware:saveHardwareApi,                                          // сохранить «железо» (локально + репо)
+  getHardware:()=>{ const r=(cfg.github&&cfg.github.repo)||''; return embedClone((manifest&&manifest.hardware)||(cfg.hardware&&cfg.hardware[r])||null); },
+  stop:()=>{ try{ return dosProps&&dosProps.stop&&dosProps.stop(); }catch(_){} },
+  run:(program)=>mount(program?{run:program}:{}),                        // запустить программу (перемонтирует с автозапуском)
+  type:(cmd)=>{ try{ return dosType(String(cmd)); }catch(e){ return Promise.reject(e); } }, // ввести DOS-команду
+  setLang:(l)=>{ try{ setLang(l); }catch(_){} },
+  setCycles:(v)=>{ (cfg.dosbox=cfg.dosbox||{}).cycles=v; try{ applyScreenPrefs(); }catch(_){} }, // применится при (пере)монтировании
+  setMute:(m)=>{ (cfg.dosbox=cfg.dosbox||{}).muted=!!m; try{ if(ci){ m?ci.mute():ci.unmute(); } updateMuteBtn(); }catch(_){} },
+  setNet:(n)=>{ cfg.net=Object.assign({}, cfg.net, n||{}); },           // IPX (применится при монтировании)
+  setAi:(ai)=>{ cfg.ai=Object.assign({}, cfg.ai, ai||{}); },            // 🔴 ассистент Claude: ключ/модель (секрет — только доверенная страница)
+  getConfig:()=>{ const g=Object.assign({}, cfg.github||{}); if(g.token) g.token='***';   // токены маскируем
+    const a=Object.assign({}, cfg.ai||{}); if(a.key) a.key='***';
+    return embedClone(Object.assign({}, cfg, {github:g, ai:a})); },
+  version:()=>{ try{ return buildNo(); }catch(_){ return null; } }
+});
 
 // ---------- индикатор лимита GitHub API ----------
 let apiLimit=null;
@@ -3107,6 +3447,12 @@ function init(){
   if($('pubCancel')) $('pubCancel').onclick=()=>storeShowPublish(false);
   if($('pubSubmit')) $('pubSubmit').onclick=storePublish;
   document.querySelectorAll('.dd-modalclose').forEach(b=> b.onclick=()=>closeModal(b.dataset.close));
+  $('hwSaveBtn').onclick=hwSubmit; $('hwSkipBtn').onclick=hwSkip;   // модалка «железо» (первый запуск)
+  // конструктор кода для вставки (Embed): перерисовываем сниппет при любом изменении полей
+  ['embRepo','embBranch','embRun','embW','embH','embHost'].forEach(id=>{ const el=$(id); if(el) el.oninput=renderEmbedSnippet; });
+  ['embBar','embTok','embVar'].forEach(id=>{ const el=$(id); if(el) el.onchange=renderEmbedSnippet; });
+  if($('embCopy')) $('embCopy').onclick=embedCopy;
+  if($('embPreview')) $('embPreview').onclick=embedPreview;
   document.querySelectorAll('.dd-modal').forEach(m=> m.addEventListener('click', e=>{ if(e.target===m) closeModal(m.id); }));
 
   // форма подключения: «Подключить и сохранить» -> сохраняем + просим браузер запомнить пароль
@@ -3226,6 +3572,8 @@ function init(){
   // ?repo=owner/name -> сразу подключить и смонтировать диск (публичное чтение)
   const share=applyShareLink();
   if(share && typeof Dos==='function') mount(share===true ? {} : share);
+  // embed-режим: слушаем конфиг от родителя (репо+токен через postMessage)
+  if(embedRequested()) initEmbed();
 }
 init();
 })();

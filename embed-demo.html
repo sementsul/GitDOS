@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GitDOS — демо встраивания (embed)</title>
+<style>
+  body{ font:14px system-ui,Segoe UI,sans-serif; max-width:900px; margin:24px auto; padding:0 16px; color:#111; }
+  h1{ font-size:20px; } label{ display:block; margin:8px 0 2px; font-size:13px; color:#444; }
+  input{ width:100%; box-sizing:border-box; padding:6px 8px; font:13px monospace; }
+  .row{ display:flex; gap:12px; } .row > div{ flex:1; }
+  button{ margin-top:12px; padding:8px 16px; cursor:pointer; }
+  #host{ margin-top:16px; border:1px solid #ccc; }
+  #status{ margin-top:8px; font:12px monospace; white-space:pre-wrap; color:#333; }
+  .warn{ background:#fff3cd; border:1px solid #ffe08a; padding:8px 10px; border-radius:6px; font-size:12px; margin:10px 0; }
+</style>
+</head>
+<body>
+  <h1>🐙 GitDOS — демо встраивания</h1>
+  <p>Пример вставки GitDOS на сторонний сайт через <code>embed.js</code>. Укажи публичный репозиторий —
+     и терминал загрузится ниже. Токен нужен только для приватных репо / записи назад.</p>
+  <div class="warn">🔴 Токен даёт доступ к репозиторию и остаётся в JS этой страницы. Вставляй с токеном
+     только на доверенной странице. Для публичного чтения токен не нужен.</div>
+
+  <div class="row">
+    <div><label>Репозиторий (owner/name)</label><input id="repo" value="sementsul/GitDOS" placeholder="owner/name"></div>
+    <div><label>Ветка</label><input id="branch" value="main" placeholder="main"></div>
+  </div>
+  <div class="row">
+    <div><label>Автозапуск (необяз., напр. GAME.EXE)</label><input id="run" placeholder="GAME.EXE"></div>
+    <div><label>Токен (необяз., только для приватных/записи)</label><input id="token" type="password" placeholder="github_pat_..."></div>
+  </div>
+  <button id="go">▶ Загрузить терминал</button>
+
+  <div id="status"></div>
+  <div id="host"></div>
+
+  <!-- Живая панель управления через API (доступна после загрузки терминала) -->
+  <fieldset id="ctrl" style="margin-top:16px;display:none">
+    <legend>Управление через API (window.GitDOS внутри iframe)</legend>
+    <div class="row">
+      <div><label>DOS-команда</label><input id="cmd" placeholder="DIR" value="DIR"></div>
+      <div style="flex:0 0 auto;align-self:flex-end"><button id="btnType">Отправить в DOS (.type)</button></div>
+    </div>
+    <div class="row">
+      <div><label>Запустить программу</label><input id="prog" placeholder="GAME.EXE"></div>
+      <div style="flex:0 0 auto;align-self:flex-end"><button id="btnRun">Запустить (.run)</button></div>
+    </div>
+    <div style="margin-top:10px">
+      <button id="btnRu">Язык RU</button>
+      <button id="btnEn">Язык EN</button>
+      <button id="btnMuteOn">🔇 Звук выкл</button>
+      <button id="btnMuteOff">🔊 Звук вкл</button>
+      <button id="btnCfg">getConfig()</button>
+      <button id="btnStop">■ Стоп</button>
+    </div>
+  </fieldset>
+
+  <script src="embed.js"></script>
+  <script>
+    var handle=null;
+    function log(m){ document.getElementById('status').textContent += m + '\n'; }
+    document.getElementById('go').onclick=function(){
+      if(handle){ handle.destroy(); handle=null; }
+      document.getElementById('status').textContent='';
+      var opts={
+        repo:   document.getElementById('repo').value.trim(),
+        branch: document.getElementById('branch').value.trim() || 'main',
+        run:    document.getElementById('run').value.trim(),
+        token:  document.getElementById('token').value.trim(),
+        height: '520px'
+      };
+      log('mount: ' + opts.repo + (opts.token ? ' (с токеном)' : ' (публичное чтение)'));
+      handle = GitDOS.mount('#host', opts)
+        .on('ready',   function(d){ log('✓ ready (сборка ' + (d.build||'?') + ')'); document.getElementById('ctrl').style.display=''; })
+        .on('mounted', function(d){ log('✓ смонтирован: ' + d.repo); })
+        .on('error',   function(d){ log('✗ ошибка: ' + d.error); });
+    };
+    // кнопки живого API — каждая дергает метод внутри iframe (Promise)
+    function on(id, fn){ document.getElementById(id).onclick=function(){ if(!handle){ log('сначала загрузи терминал'); return; } fn(); }; }
+    on('btnType',   function(){ handle.type(document.getElementById('cmd').value).then(function(){ log('→ команда отправлена'); }); });
+    on('btnRun',    function(){ handle.run(document.getElementById('prog').value).then(function(){ log('→ запуск программы'); }); });
+    on('btnRu',     function(){ handle.setLang('ru'); log('→ язык RU'); });
+    on('btnEn',     function(){ handle.setLang('en'); log('→ язык EN'); });
+    on('btnMuteOn', function(){ handle.setMute(true);  log('→ звук выкл'); });
+    on('btnMuteOff',function(){ handle.setMute(false); log('→ звук вкл'); });
+    on('btnCfg',    function(){ handle.getConfig().then(function(c){ log('getConfig: ' + JSON.stringify(c.github) + ' | dosbox: ' + JSON.stringify(c.dosbox)); }); });
+    on('btnStop',   function(){ handle.stop(); log('→ стоп'); });
+  </script>
+</body>
+</html>
