@@ -7,9 +7,6 @@ GitDOS — браузерный клиент **DOSBox** (движок **js-dos v
 **GitHub-репозиторий**: чтение, запись и **автосохранение** прямо в git. Дополнительные репозитории
 подключаются как папки `C:\DISKS\<буква>`. Интерфейс в стиле установщика Windows 98, RU/EN.
 
-> Это веб-обёртка вокруг эмулятора. Сам DOSBox — GPL-2.0, js-dos — MIT (без изменений, в `vendor/`).
-> Подробности и лицензии — `THIRD-PARTY.md`.
-
 Web клиент для Windows:
 [GitDOS-win32-x64.zip](https://github.com/sementsul/GitDOS/releases/download/1.0.0/GitDOS.zip)
 
