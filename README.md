@@ -26,7 +26,7 @@ GitDOS — это браузерный Git-клиент на основе DOSBox
 | Платформа | Инструкция |
 |---|---|
 | **Windows (готовый .exe)** | ⬇️ [Скачать GitDOS-win32-x64.zip](path/to/GitDOS-win32-x64.zip) |
-| **macOS / Linux** | Собрать самостоятельно с помощью Nativefier: ```bash npm install -g @gwicho38/nativefier             nativefier "https://sementsul.github.io/GitDOS" --platform mac   # или linux<br>``` |
+| **macOS / Linux** | Собрать самостоятельно с помощью Nativefier:           ```bash npm install -g @gwicho38/nativefier             nativefier "https://sementsul.github.io/GitDOS" --platform mac   # или linux<br>``` |
 
 ---
 
