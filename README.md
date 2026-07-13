@@ -1,4 +1,4 @@
-# GitDOS — это браузерный Git-клиент на основе DOSBox (движок js-dos v8) c ИИ асистентом от Claude Code
+# GitDOS — это браузерный Git-клиент на основе DOSBox (движок js-dos v8) c ИИ ассистентом от Claude Code
 
 [![GitDOS Client(latest by date)](https://img.shields.io/github/v/release/sementsul/GitDOS?style=flat-square&logo=github)](https://github.com/sementsul/GitDOS/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
