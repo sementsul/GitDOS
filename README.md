@@ -1,6 +1,6 @@
 # GitDOS — DOS в браузере, диск из GitHub
 
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/sementsul/GitDOS?style=flat-square&logo=github)](https://github.com/sementsul/GitDOS/releases)
+[![GitDOS Client(latest by date)](https://img.shields.io/github/v/release/sementsul/GitDOS?style=flat-square&logo=github)](https://github.com/sementsul/GitDOS/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 [![Website sementsul.github.io/GitDOS](https://img.shields.io/website?down_color=red&down_message=offline&label=Live%20Demo&style=flat-square&up_color=success&up_message=online&url=https%3A%2F%2Fsementsul.github.io%2FGitDOS)](https://sementsul.github.io/GitDOS)
 
