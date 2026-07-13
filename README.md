@@ -15,7 +15,7 @@ Web клиент для Windows:
 
 bash
 npm install -g @gwicho38/nativefier \
-nativefier "https://sementsul.github.io/GitDOS" --platform mac # or linux \
+nativefier "https://sementsul.github.io/GitDOS" --platform mac # or linux
 
 ## Что умеет
 - **Диск = репозиторий**: монтирование C: из публичного или приватного репо, доп. диски D:/E:…
