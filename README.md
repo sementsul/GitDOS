@@ -1,6 +1,7 @@
 # GitDOS — DOS в браузере, диск из GitHub
 
-**Автор: Sementsul Maxim.** Сайт: https://sementsul.github.io/GitDOS/ · Репозиторий: https://github.com/sementsul/GitDOS/ . GitDOS Client: [https://github.com/sementsul/GitDOS/releases/](https://github.com/sementsul/GitDOS/releases/download/1.0.0/GitDOS.zip)
+**Автор: Sementsul Maxim.** Сайт: https://sementsul.github.io/GitDOS/ · Репозиторий: https://github.com/sementsul/GitDOS/ . GitDOS Client: https://github.com/sementsul/GitDOS/releases/tag/1.0.0
+
 
 GitDOS — браузерный клиент **DOSBox** (движок **js-dos v8**, лежит локально), где диск C: — это
 **GitHub-репозиторий**: чтение, запись и **автосохранение** прямо в git. Дополнительные репозитории
@@ -8,6 +9,16 @@ GitDOS — браузерный клиент **DOSBox** (движок **js-dos v
 
 > Это веб-обёртка вокруг эмулятора. Сам DOSBox — GPL-2.0, js-dos — MIT (без изменений, в `vendor/`).
 > Подробности и лицензии — `THIRD-PARTY.md`.
+
+Web клиент для Windows:
+[GitDOS-win32-x64.zip](https://github.com/sementsul/GitDOS/releases/download/1.0.0/GitDOS.zip)
+
+Для других ОС
+Если вам нужна сборка для macOS или Linux, вы можете собрать её самостоятельно:
+
+bash
+npm install -g @gwicho38/nativefier
+nativefier "https://sementsul.github.io/GitDOS" --platform mac # or linux
 
 ## Что умеет
 - **Диск = репозиторий**: монтирование C: из публичного или приватного репо, доп. диски D:/E:…
@@ -48,3 +59,5 @@ GitHub-токен пользователь вводит **в браузере** 
 и **не кладётся в ссылки «Поделиться»**. Для приватных репозиториев и записи нужен токен с правом `repo`.
 
 Заметки по разработке и грабли — `docs/project-notes.md`.
+
+
