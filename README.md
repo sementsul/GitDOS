@@ -3,7 +3,7 @@
 **Автор: Sementsul Maxim.** Сайт: https://sementsul.github.io/GitDOS/ · Репозиторий: https://github.com/sementsul/GitDOS/ . GitDOS Client: https://github.com/sementsul/GitDOS/releases/tag/1.0.0
 
 
-GitDOS — браузерный клиент **DOSBox** (движок **js-dos v8**, лежит локально), где диск C: — это
+GitDOS — браузерный Git клиент на основе **DOSBox** (движок **js-dos v8**, лежит локально), где диск C: — это
 **GitHub-репозиторий**: чтение, запись и **автосохранение** прямо в git. Дополнительные репозитории
 подключаются как папки `C:\DISKS\<буква>`. Интерфейс в стиле установщика Windows 98, RU/EN.
 
