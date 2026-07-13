@@ -7,7 +7,7 @@
 **Автор:** Sementsul Maxim  
 **Сайт:** [https://sementsul.github.io/GitDOS](https://sementsul.github.io/GitDOS)  
 **Репозиторий:** [https://github.com/sementsul/GitDOS](https://github.com/sementsul/GitDOS)  
-**Клиент для Windows:** [Скачать .exe (.zip)](path/to/GitDOS-win32-x64.zip)
+**Клиент для Windows:** [Скачать .exe (.zip)](https://github.com/sementsul/GitDOS/releases/download/1.0.0/GitDOS.zip)
 
 > **Важно:** Ссылки на скачивание клиента и API-ключи необходимо заменить на актуальные перед публикацией.
 
@@ -25,7 +25,7 @@ GitDOS — это браузерный Git-клиент на основе DOSBox
 
 | Платформа | Инструкция |
 |---|---|
-| **Windows (готовый .exe)** | ⬇️ [Скачать GitDOS-win32-x64.zip](path/to/GitDOS-win32-x64.zip) |
+| **Windows (готовый .exe)** | ⬇️ [Скачать GitDOS-win32-x64.zip](https://github.com/sementsul/GitDOS/releases/download/1.0.0/GitDOS.zip) |
 | **macOS / Linux** | Собрать самостоятельно с помощью Nativefier:        ```bash npm install -g @gwicho38/nativefier             nativefier "https://sementsul.github.io/GitDOS" --platform mac   # или linux<br>``` |
 
 ---
