@@ -2,11 +2,10 @@
 
 [![GitDOS Client(latest by date)](https://img.shields.io/github/v/release/sementsul/GitDOS?style=flat-square&logo=github)](https://github.com/sementsul/GitDOS/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
-[![Website sementsul.github.io/GitDOS](https://img.shields.io/website?down_color=red&down_message=offline&label=Live%20Demo&style=flat-square&up_color=success&up_message=online&url=https%3A%2F%2Fsementsul.github.io%2FGitDOS)](https://sementsul.github.io/GitDOS)
+
 
 **Автор:** Sementsul Maxim  
-**GitDOS WEB:** [https://sementsul.github.io/GitDOS](https://sementsul.github.io/GitDOS)  
-**Репозиторий:** [https://github.com/sementsul/GitDOS](https://github.com/sementsul/GitDOS)  
+**GitDOS WEB:** [https://sementsul.github.io/GitDOS](https://sementsul.github.io/GitDOS)    
 **Клиент для Windows:** [Скачать .exe (.zip)](https://github.com/sementsul/GitDOS/releases/download/1.0.0/GitDOS.zip)
 
 ---
@@ -24,7 +23,7 @@ GitDOS — это браузерный Git-клиент на основе DOSBox
 | Платформа | Инструкция |
 |---|---|
 | **Windows (готовый .exe)** | ⬇️ [Скачать GitDOS-win32-x64.zip](https://github.com/sementsul/GitDOS/releases/download/1.0.0/GitDOS.zip) |
-| **macOS / Linux** | Собрать самостоятельно с помощью Nativefier:  ```                                                                bash                                                                                                            npm install -g @gwicho38/nativefier                                                                             nativefier "https://sementsul.github.io/GitDOS" --platform mac   # или linux<br>``` |
+| **macOS / Linux** | Собрать самостоятельно с помощью Nativefier:  ```                                                                bash                                                                                                            npm install -g @gwicho38/nativefier                                                                             nativefier "https://sementsul.github.io/GitDOS" --platform mac   # или linux``` |
 
 ---
 
