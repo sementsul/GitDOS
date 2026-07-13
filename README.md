@@ -14,8 +14,8 @@ Web клиент для Windows:
 Если вам нужна сборка для macOS или Linux, вы можете собрать её самостоятельно:
 
 bash
-npm install -g @gwicho38/nativefier
-nativefier "https://sementsul.github.io/GitDOS" --platform mac # or linux
+npm install -g @gwicho38/nativefier \
+nativefier "https://sementsul.github.io/GitDOS" --platform mac # or linux \
 
 ## Что умеет
 - **Диск = репозиторий**: монтирование C: из публичного или приватного репо, доп. диски D:/E:…
